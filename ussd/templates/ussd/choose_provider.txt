@@ -1,0 +1,7 @@
+{% extends 'ussd/base_screen.txt' %}
+{% block content %}
+Choose the gas provider
+{% for provider in providers %}
+{{forloop.counter}}. {{provider.name}}
+{% endfor %}
+{% endblock %}
