@@ -1,2 +1,5 @@
+{% extends 'ussd/base_screen.txt' %}
+{% block content %}
+We shall contact you in a few minutes to get more information about the cylinder.
 Thank you for shopping with us.
-We shall call you in a few minutes to discuss how we can help you better.
+{% endblock %}

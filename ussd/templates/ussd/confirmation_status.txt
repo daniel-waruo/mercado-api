@@ -1,6 +1,6 @@
 {% extends 'ussd/base_screen.txt' %}
 {% block content %}
-Order a {{ provider.name }} {{ category.name }} cylinder?
+Order a {{ item.brand.name }} {{ item.category.name }} cylinder for Ksh.{{ item.price }}?
 1. Yes
 2. No
 {% endblock %}

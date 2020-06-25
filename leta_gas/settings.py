@@ -17,16 +17,24 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
+import environ
+
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False)
+)
+
+# reading .env file
+environ.Env.read_env(env_file=os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'or*!#&$$qkk#&wdqyh@*q_hfww)^fx*c8el3k86h$o$6s25lcj'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = [
-    '127.0.0.1'
-]
+ALLOWED_HOSTS = []
+
 if DEBUG:
     ALLOWED_HOSTS.append("*")
 
@@ -126,3 +134,16 @@ STATIC_URL = '/static/'
 
 # set screen urls path
 SCREEN_URLS_PATH = 'ussd.screen_urls'
+
+# africastalking configuration
+AFRICASTALKING = {
+    'username': env('AT_USERNAME'),
+    'api_key': env('AT_API_KEY'),
+    'product_name': env('AT_PRODUCT_NAME')
+}
+
+# default vendor config
+VENDOR = {
+    'phone': "+254797792447",
+    'name': 'Daniel'
+}

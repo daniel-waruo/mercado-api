@@ -1,0 +1,4 @@
+{% extends 'sms/base.txt' %}
+{% block content %}
+Your {% for item in order.items %}{{ item }}{% endfor %} has been dispatched.
+Expected time of arrival: 3–5pm Today. If you are not home at that time, please call 0161 5555555 or reply to this text.{% endblock %}

@@ -1,0 +1,6 @@
+{% extends 'ussd/base_screen.txt' %}
+{% block content %}
+How do you want to pay?
+1. M-PESA
+2. On Delivery
+{% endblock %}

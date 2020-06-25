@@ -1,0 +1,6 @@
+{% extends 'sms/base.txt' %}
+{% block content %}
+Your {% for item in order.items %}{{ item }}{% endfor %} is ready for delivery.
+Expected time of arrival: {{  delivery_start |date:"l g:i a" }}- {{ delivery_end|date:"l g:i a" }}.
+If you are not home at that time,please call 0797792447.
+{% endblock %}

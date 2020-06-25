@@ -1,0 +1,6 @@
+{% extends 'sms/base.txt' %}
+{% block content %}
+Unfortunately your canceled payment.
+You can place a new order by dialing *384*14344# or call us to place your order.
+PHONE NUMBER: 0797792447
+{% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'ussd/base_screen.txt' %}
 {% block content %}
-Do you have the cylinder for exchange ({{ provider.name }} {{ category.name }} cylinder)
+Do you have a  {{ item.brand.name }} {{ item.category.name }} cylinder for exchange?
 1. Yes
 2. No
 {% endblock %}

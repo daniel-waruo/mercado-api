@@ -1,0 +1,5 @@
+FROM :LETA GAS
+{% block content %}
+{% endblock %}
+
+Thank you and keep safe.

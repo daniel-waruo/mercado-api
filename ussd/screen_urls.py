@@ -3,6 +3,8 @@ from .screens import (
     ChooseCylinderScreen,
     ChooseOwnershipStatusScreen,
     ChooseConfirmationStatusScreen,
+    ChoosePaymentMethodScreen,
+    FinishMpesaPaymentScreen,
     FinishNoCylinderScreen,
     FinishOrderScreen
 )
@@ -12,6 +14,8 @@ screens = [
     ChooseCylinderScreen,
     ChooseOwnershipStatusScreen,
     ChooseConfirmationStatusScreen,
+    ChoosePaymentMethodScreen,
+    FinishMpesaPaymentScreen,
     FinishNoCylinderScreen,
     FinishOrderScreen
 ]
