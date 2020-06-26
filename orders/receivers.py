@@ -21,16 +21,15 @@ def mobile_checkout(sender, **kwargs):
     session = kwargs['session']
     buyer = session.context['buyer']
     session_state = session.session.state
-
     if session_state == 'finish_mpesa' and OrderCheckout.objects.filter(order__buyer=buyer).exists():
-        order_checkout = OrderCheckout.objects.get(order__buyer=buyer)
-        order_checkout.delete()
+        order_checkout = OrderCheckout.objects.filter(order__buyer=buyer).last()
+        OrderCheckout.objects.filter(order__buyer=buyer).delete()
         order = order_checkout.order
         product_name = settings.AFRICASTALKING['product_name']
         total_amount = float(order.get_order_total())
-        """makes the actual request on the user's device"""
+        """sleep for 5 sec to ensure the user has called the dialog"""
         sleep(5)
-        response = pay.mobile_checkout(
+        pay.mobile_checkout(
             product_name=product_name,
             phone_number=order.buyer.phone_number,
             currency_code='KES',
@@ -39,4 +38,3 @@ def mobile_checkout(sender, **kwargs):
                 'order_id': str(order.id)
             }
         )
-        print(colorize(response, ft='green'))

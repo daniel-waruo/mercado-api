@@ -9,15 +9,11 @@ class USSDSession:
     def __init__(self, session_id: str, context: dict = None):
         self._session_id: str = session_id
         self.context = context
-
-    @property
-    def session(self):
-        return self.get_session()
+        self.session = self.get_session()
 
     @property
     def current_screen(self):
-        session = self.session
-        return get_screen(session.state, data=session.data)
+        return get_screen(self.session.state, data=self.session.data)
 
     def get_session(self, state=None, data=None):
         session, created = USSDState.objects.get_or_create(
@@ -31,6 +27,10 @@ class USSDSession:
 
     def render(self, screen):
         """gets the screen type and renders the screen"""
+        self.session.update(
+            state=screen.state,
+            data=screen.data
+        )
         screen.set_context(self.context)
         try:
             if screen.type == "CON":
@@ -45,10 +45,6 @@ class USSDSession:
         raise Exception("invalid screen type")
 
     def con(self, screen):
-        self.session.update(
-            state=screen.state,
-            data=screen.data
-        )
         response = "CON " + screen.render()
         return Response(self, response)
 
