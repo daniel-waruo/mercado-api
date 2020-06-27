@@ -1,0 +1,1 @@
+web: gunicorn leta_gas.wsgi

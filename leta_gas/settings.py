@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import django_heroku
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -144,6 +145,8 @@ AFRICASTALKING = {
 
 # default vendor config
 VENDOR = {
-    'phone': "+254797792447",
-    'name': 'Daniel'
+    'phone': env('VENDOR_PHONE'),
+    'name': env('VENDOR_NAME')
 }
+# Activate django heroku settings
+django_heroku.settings(locals())
