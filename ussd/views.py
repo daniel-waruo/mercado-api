@@ -43,4 +43,4 @@ def index(request):
             # get the next screen
             next_screen = current_screen.next_screen(current_input)
             return session.render(next_screen)
-    return HttpResponse("POST REQUEST ONLY")
+    return HttpResponse("Invalid HTTP method", status=403)

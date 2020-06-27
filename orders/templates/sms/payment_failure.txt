@@ -1,6 +1,6 @@
 {% extends 'sms/base.txt' %}
 {% block content %}
-Unfortunately your canceled payment.
+Unfortunately your M PESA payment request was not successful.
 You can place a new order by dialing *384*14344# or call us to place your order.
-PHONE NUMBER: 0797792447
+PHONE NUMBER: 0797792447 (Daniel)
 {% endblock %}

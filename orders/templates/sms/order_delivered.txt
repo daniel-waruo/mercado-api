@@ -1,0 +1,6 @@
+{% extends 'sms/base.txt' %}
+{% block content %}
+Thank You for shopping with us.
+For any complaints ,complements or suggestions about the service text or call the number below.
+PHONE NUMBER: 0797792447(Daniel)
+{% endblock %}

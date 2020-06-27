@@ -4,7 +4,6 @@ from django.db import models
 from django.db.models import Sum
 from django.template.loader import render_to_string
 from django.utils import timezone
-
 from buyers.models import Buyer, ContactQueue
 from dj_africastalking.sms import send_sms
 from items.models import Item
@@ -15,16 +14,16 @@ vendor_name = settings.VENDOR['name']
 
 # Create your models here.
 class OrderManager(models.Manager):
-    def make_order(self, buyer, item, on_delivery=True):
-        extra_kwargs = {}
-        if not on_delivery:
-            extra_kwargs = {
-                'payment_method': 'm-pesa'
-            }
-        order = self.create(buyer=buyer, **extra_kwargs)
+    def make_order(self, buyer, item, payment_method='on-delivery'):
+        assert payment_method in ['m-pesa', 'on-delivery']
+        order = self.create(
+            payment_method=payment_method,
+            buyer=buyer
+        )
+        # add item to order
         order.add_item(item)
-        if on_delivery:
-            ContactQueue.objects.add(buyer, reason="Ordered A Delivery.Get Location")
+        # send order requested signal
+        order_requested.send(sender=Order, order=order)
         return order
 
 
@@ -62,6 +61,7 @@ class Order(models.Model):
     objects = OrderManager()
 
     def add_item(self, item, quantity=1):
+        """adds an item to the order"""
         return OrderItem.objects.create(
             order=self,
             product=item,
@@ -69,6 +69,7 @@ class Order(models.Model):
         )
 
     def get_order_total(self, null=False):
+        """ get the total cost for the order """
         total = self.items.all().aggregate(
             Sum('product__price')
         )
@@ -79,89 +80,50 @@ class Order(models.Model):
 
     def pay_for_order(self):
         """ function for paying for AfricasTalking Items """
-        product_name = settings.AFRICASTALKING['product_name']
-        total_amount = float(self.get_order_total())
-        checkout_request.send(sender=self, buyer=self.buyer)
+        checkout_request.send(sender=self.__class__, order=self)
 
-    def payment_fail(self):
+    def payment_fail(self, transaction_id):
         self.payment_status = 'failed'
         self.save()
-        send_sms(
-            self.buyer.phone_number,
-            render_to_string(
-                'sms/payment_success.txt',
-                context={
-                    'buyer': self.buyer,
-                    'order': self
-                }
-            )
+        mpesa_transaction = OrderMpesaTransaction.objects.failed_transaction(
+            order=self,
+            transaction_id=transaction_id
         )
-        ContactQueue.objects.add(self.buyer, reason="Payment Failed")
+        # send payment failiure signal
+        payment_fail.send(self.__class__, order=self)
+        return mpesa_transaction
 
-    def payment_success(self, transaction_id):
+    def payment_success(self, transaction_id, mpesa_id):
         self.payment_status = 'success'
         self.save()
-        OrderMpesaTransaction.objects.create(
+        mpesa_transaction = OrderMpesaTransaction.objects.successful_transaction(
             order=self,
-            transaction_id=transaction_id
+            transaction_id=transaction_id,
+            mpesa_id=mpesa_id,
         )
-        send_sms(
-            self.buyer.phone_number,
-            render_to_string(
-                'sms/payment_success.txt',
-                context={
-                    'buyer': self.buyer,
-                    'order': self
-                }
-            )
-        )
-        ContactQueue.objects.add(self.buyer, reason="Paid Successfully and Ordered Goods.Get Location")
-        return OrderMpesaTransaction.objects.create(
-            order=self,
-            transaction_id=transaction_id
-        )
+        payment_success.send(self.__class__, order=self)
+        return mpesa_transaction
 
     def ship_order(self):
         self.status = 'ship'
         self.save()
-        delivery_start = timezone.datetime.now() + timezone.timedelta(minutes=30)
-        delivery_end = timezone.datetime.now() + timezone.timedelta(hours=1)
-        send_sms(
-            self.buyer.phone_number,
-            render_to_string(
-                'sms/order_shipping.txt',
-                context={
-                    'buyer': self.buyer,
-                    'order': self,
-                    'delivery_start': delivery_start,
-                    'delivery_end': delivery_end
-                }
-            )
-        )
+        # send order shipping signal
+        order_shipping.send(self.__class__, order=self)
 
     def cancel_order(self):
         self.status = 'can'
         self.save()
-        send_sms(
-            self.buyer.phone_number,
-            render_to_string(
-                'sms/order_cancel.txt',
-                context={
-                    'buyer': self.buyer,
-                    'order': self,
-                }
-            )
-        )
-        ContactQueue.objects.add(self.buyer, reason="Cancelled Order")
+        # send order cancelled signal
+        order_cancel.send(self.__class__, order=self)
 
     def finish_order(self):
         self.status = 'can'
         self.save()
-        ContactQueue.objects.add(buyer=self.buyer, reason="Finished Order Get Feed Back")
+        # send order delivered signal
+        order_delivered.send(self.__class__, order=self)
 
     def __str__(self):
-        return "order by {} time - {}".format(self.buyer.phone_number,
-                                              self.created_at.strftime('%I:%M %p on the %d of %B %Y'))
+        return "{} {} {} {}".format(self.id, self.buyer.phone_number, self.payment_method, self.payment_status)
 
 
 class OrderItem(models.Model):
@@ -183,16 +145,40 @@ class OrderItem(models.Model):
         return self.product.name
 
 
+class OrderMpesaTransactionManager(models.Manager):
+    def successful_transaction(self, order, transaction_id, mpesa_id):
+        return self.create(
+            order=order,
+            transaction_id=transaction_id,
+            mpesa_transaction_id=mpesa_id,
+            status='success'
+        )
+
+    def failed_transaction(self, order, transaction_id):
+        return self.create(
+            order=order,
+            transaction_id=transaction_id
+        )
+
+
 class OrderMpesaTransaction(models.Model):
     """This maps all our orders paid by m-pesa
      Args:
-         transaction_id - The mpesa transaction code provided by safaricom
+         mpesa_transaction_id - The code provided by safaricom
+         transaction_id - The transaction id provided by africastalking
          order - The order mapped on this transaction
      """
-    transaction_id = models.CharField(max_length=200, primary_key=True)
-    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='transaction')
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='transaction', editable=False)
+    transaction_id = models.CharField(max_length=200, primary_key=True, editable=False, unique=True)
+    mpesa_transaction_id = models.CharField(max_length=200, null=True, editable=False, unique=True)
 
-    # africastalking_id = models.CharField(max_length=200, null=True)
+    STATUS = (
+        ('success', 'Success'),
+        ('failed', 'Failed')
+    )
+    status = models.CharField(max_length=10, choices=STATUS, default='failed', editable=False)
+
+    objects = OrderMpesaTransactionManager()
 
     def __str__(self):
         return self.transaction_id

@@ -54,4 +54,5 @@ class USSDSession:
         return Response(self, response)
 
     def end_session(self):
-        self.session.delete()
+        if self.session.pk:
+            self.session.delete()

@@ -193,7 +193,8 @@ class FinishMpesaPaymentScreen(Screen):
             buyer=self.context['buyer'],
             item=Item.objects.get(
                 id=self.data['item_id']
-            )
+            ),
+            payment_method='m-pesa'
         )
         order.pay_for_order()
         return render_to_string(

@@ -16,8 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from ussd.views import index
+from orders.views import confirm_payment
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('ussd/', index)
+    path('ussd/', index),
+    path('ussd/checkout_callback', confirm_payment)
 ]
