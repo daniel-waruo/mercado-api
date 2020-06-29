@@ -157,7 +157,10 @@ class OrderItem(models.Model):
         unique_together = (('order', 'product'), ('order', 'c_product'))
 
     def __str__(self):
-        return "ITEM {} of {} ".format(self.id, self.order)
+        if self.product:
+            return self.product.name
+        if self.c_product:
+            return self.c_product.name
 
     def save(self, **kwargs):
         if self.product and self.c_product:

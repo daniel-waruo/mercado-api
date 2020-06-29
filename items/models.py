@@ -68,4 +68,4 @@ class ComplementaryItem(models.Model):
     objects = ModelManager()
 
     def __str__(self):
-        return self.name
+        return "{} - {}".format(self.name, self.item)
