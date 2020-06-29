@@ -42,10 +42,28 @@ class Item(models.Model):
         name - name of the item
         category  - category where the item belongs e.g gas cylinder, gas burner
         price - price in KES of the item being sold
+        cylinder_price - price in KES of the
     """
     name = models.CharField(max_length=200)
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL, related_name='items')
     brand = models.ForeignKey(Brand, null=True, on_delete=models.SET_NULL, related_name='items')
+    price = models.DecimalField(decimal_places=2, max_digits=9)
+    objects = ModelManager()
+
+    def __str__(self):
+        return self.name
+
+
+class ComplementaryItem(models.Model):
+    """These are items sold alongside the main items
+
+    Args:
+        name - name of the complementary item
+        price - price of the complementary item in shillings
+        item - a link of the item to be linked to
+    """
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='complementary_items')
+    name = models.CharField(max_length=200)
     price = models.DecimalField(decimal_places=2, max_digits=9)
     objects = ModelManager()
 

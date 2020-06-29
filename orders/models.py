@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from buyers.models import Buyer, ContactQueue
 from dj_africastalking.sms import send_sms
-from items.models import Item
+from items.models import Item, ComplementaryItem
 
 vendor_phone = settings.VENDOR['phone']
 vendor_name = settings.VENDOR['name']
@@ -61,7 +61,13 @@ class Order(models.Model):
     objects = OrderManager()
 
     def add_item(self, item, quantity=1):
-        """adds an item to the order"""
+        """ adds an item to the order"""
+        if isinstance(item, ComplementaryItem):
+            return OrderItem.objects.create(
+                order=self,
+                c_product=item,
+                quantity=quantity
+            )
         return OrderItem.objects.create(
             order=self,
             product=item,
@@ -70,11 +76,19 @@ class Order(models.Model):
 
     def get_order_total(self, null=False):
         """ get the total cost for the order """
-        total = self.items.all().aggregate(
+        amount_product = self.items.all().aggregate(
+            Sum('c_product__price')
+        )['c_product__price__sum']
+        amount_c_product = self.items.all().aggregate(
             Sum('product__price')
-        )
-        amount_total = total['product__price__sum']
-        if not null and amount_total is None:
+        )['product__price__sum']
+        # set 0 if None
+        amount_c_product = 0 if amount_c_product is None else amount_c_product
+        amount_product = 0 if amount_product is None else amount_product
+        # get total sum
+        amount_total = amount_c_product + amount_product
+
+        if not null and amount_total == 0:
             raise Exception("No Order Items.Add items to the order")
         return amount_total
 
@@ -134,15 +148,21 @@ class OrderItem(models.Model):
         quantity -  number of products which were ordered
     """
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Item, on_delete=models.CASCADE)
+    product = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, related_name='ordered_items')
+    c_product = models.ForeignKey(ComplementaryItem, on_delete=models.CASCADE, null=True, related_name='ordered_items')
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1, "Quantity cannot be less than one")],
                                            default=1)
 
     class Meta:
-        unique_together = ('order', 'product')
+        unique_together = (('order', 'product'), ('order', 'c_product'))
 
     def __str__(self):
-        return self.product.name
+        return "ITEM {} of {} ".format(self.id, self.order)
+
+    def save(self, **kwargs):
+        if self.product and self.c_product:
+            raise Exception("cannot have a complementary item and an item at the same time")
+        super().save(**kwargs)
 
 
 class OrderMpesaTransactionManager(models.Manager):

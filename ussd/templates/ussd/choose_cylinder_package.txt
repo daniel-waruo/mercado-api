@@ -1,0 +1,9 @@
+{% extends 'ussd/base_screen.txt' %}
+{% block content %}
+Choose one of the packages below
+{% for package in packages %}
+{{forloop.counter}}. {{package.name}} Ksh.{{ package.price }}
+{% endfor %}
+Or
+0. Talk to us
+{% endblock %}

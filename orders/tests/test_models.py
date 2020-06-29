@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from buyers.models import Buyer
-from items.models import Item
+from items.models import Item, ComplementaryItem
 from orders.models import Order, OrderItem, OrderMpesaTransaction
 
 
@@ -35,8 +35,14 @@ class OrderTestCase(TestCase):
 
     def test_get_order_total(self):
         self.order.add_item(item=self.item)
+        c_item = ComplementaryItem.objects.create(
+            item=self.item,
+            name='Test Comp Item',
+            price=200
+        )
+        self.order.add_item(item=c_item)
         self.assertIsNotNone(self.order.get_order_total())
-        self.assertEqual(self.item.price, self.order.get_order_total())
+        self.assertEqual(self.item.price + c_item.price, self.order.get_order_total())
 
     def test_pay_for_order(self):
         self.order.add_item(item=self.item)
@@ -44,7 +50,8 @@ class OrderTestCase(TestCase):
 
     def test_payment_fail(self):
         self.order.add_item(item=self.item)
-        self.order.payment_fail()
+        fake_transaction_id = "dfajksdflkajsdf"
+        self.order.payment_fail(fake_transaction_id)
         self.assertEqual(self.order.payment_status, 'failed')
 
     def test_payment_success(self):

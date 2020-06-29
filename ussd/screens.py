@@ -2,7 +2,7 @@ from django.template.loader import render_to_string
 
 from orders.models import Order
 from ussd_screens.screens import Screen
-from items.models import Brand, Category, Item
+from items.models import Brand, Category, Item, ComplementaryItem
 from ussd_screens.utils import get_screen
 from buyers.models import ContactQueue
 
@@ -97,10 +97,56 @@ class ChooseOwnershipStatusScreen(Screen):
                 'choose_confirmation_status',
                 data={
                     'item_id': self.data['item_id'],
+                    'complementary': False
                 }
             )
         if current_input == 2:
+            # return get_screen('finish_no_cylinder')
+            return get_screen(
+                'choose_cylinder_package',
+                data={
+                    'item_id': self.data['item_id'],
+                }
+            )
+
+
+class ChooseCylinderPackage(Screen):
+    required_fields = ['item_id']
+    state = 'choose_cylinder_package'
+
+    def render(self):
+        """ return a choose cylinder package screen"""
+        item = Item.objects.get(
+            id=self.data['item_id']
+        )
+        cylinder_packages = item.complementary_items.all()
+        return render_to_string(
+            'ussd/choose_cylinder_package.txt',
+            context={
+                'errors': self.errors,
+                'packages': cylinder_packages
+            }
+        )
+
+    def next_screen(self, current_input):
+        """get sender option or talk to us request """
+        if current_input == 0:
             return get_screen('finish_no_cylinder')
+
+        try:
+            item = Item.objects.get(
+                id=self.data['item_id']
+            )
+            complementary_item = item.complementary_items.get_by_position(current_input)
+        except Exception:
+            return self.error_screen(errors=['Invalid option.Check and try again'])
+        return get_screen(
+            'choose_confirmation_status',
+            data={
+                'item_id': complementary_item.id,
+                'complementary': True
+            }
+        )
 
 
 class FinishNoCylinderScreen(Screen):
@@ -122,16 +168,22 @@ class FinishNoCylinderScreen(Screen):
 
 
 class ChooseConfirmationStatusScreen(Screen):
-    required_fields = ['item_id']
+    required_fields = ['item_id', 'complementary']
     state = 'choose_confirmation_status'
     context = None
 
     def render(self):
         """ returns a confirmation status screen if ownership else finished  """
         # check if the user has valid input
-        item = Item.objects.get(
-            id=self.data['item_id']
-        )
+
+        if self.data['complementary']:
+            item = ComplementaryItem.objects.get(
+                id=self.data['item_id']
+            )
+        else:
+            item = Item.objects.get(
+                id=self.data['item_id']
+            )
         return render_to_string(
             'ussd/confirmation_status.txt',
             context={
@@ -147,7 +199,8 @@ class ChooseConfirmationStatusScreen(Screen):
             return get_screen(
                 'choose_payment_method',
                 data={
-                    'item_id': self.data['item_id']
+                    'item_id': self.data['item_id'],
+                    'complementary': self.data['complementary']
                 }
             )
         if current_input == 2:
@@ -155,7 +208,7 @@ class ChooseConfirmationStatusScreen(Screen):
 
 
 class ChoosePaymentMethodScreen(Screen):
-    required_fields = ['item_id']
+    required_fields = ['item_id', 'complementary']
     state = 'choose_payment_method'
 
     def render(self):
@@ -170,30 +223,38 @@ class ChoosePaymentMethodScreen(Screen):
             return get_screen(
                 'finish_mpesa',
                 data={
-                    'item_id': self.data['item_id']
+                    'item_id': self.data['item_id'],
+                    'complementary': self.data['complementary']
                 }
             )
         if current_input == 2:
             return get_screen(
                 'finish_order',
                 data={
-                    'item_id': self.data['item_id']
+                    'item_id': self.data['item_id'],
+                    'complementary': self.data['complementary']
                 }
             )
 
 
 class FinishMpesaPaymentScreen(Screen):
-    required_fields = ['item_id']
+    required_fields = ['item_id', 'complementary']
     state = 'finish_mpesa'
     type = 'END'
 
     def render(self):
+        if self.data['complementary']:
+            item = ComplementaryItem.objects.get(
+                id=self.data['item_id']
+            )
+        else:
+            item = Item.objects.get(
+                id=self.data['item_id']
+            )
         # make an order
         order = Order.objects.make_order(
             buyer=self.context['buyer'],
-            item=Item.objects.get(
-                id=self.data['item_id']
-            ),
+            item=item,
             payment_method='m-pesa'
         )
         order.pay_for_order()
@@ -203,17 +264,23 @@ class FinishMpesaPaymentScreen(Screen):
 
 
 class FinishOrderScreen(Screen):
-    required_fields = ['item_id']
+    required_fields = ['item_id', 'complementary']
     state = 'finish_order'
     type = 'END'
 
     def render(self):
+        if self.data['complementary']:
+            item = ComplementaryItem.objects.get(
+                id=self.data['item_id']
+            )
+        else:
+            item = Item.objects.get(
+                id=self.data['item_id']
+            )
         # make an order
         Order.objects.make_order(
             buyer=self.context['buyer'],
-            item=Item.objects.get(
-                id=self.data['item_id']
-            )
+            item=item
         )
         return render_to_string(
             'ussd/finish_order.txt',
