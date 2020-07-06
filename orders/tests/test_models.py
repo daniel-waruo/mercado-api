@@ -50,14 +50,16 @@ class OrderTestCase(TestCase):
 
     def test_payment_fail(self):
         self.order.add_item(item=self.item)
-        fake_transaction_id = "dfajksdflkajsdf"
-        self.order.payment_fail(fake_transaction_id)
+        transaction_id = "Fake Transaction ID"
+        self.order.payment_fail(transaction_id)
         self.assertEqual(self.order.payment_status, 'failed')
 
     def test_payment_success(self):
-        # order_mpesa_transaction = self.order.payment_success()
-        # self.assertIsInstance(
-        #    order_mpesa_transaction,
-        #    OrderMpesaTransaction
-        #    )
-        pass
+        transaction_id = "Fake Transaction ID"
+        mpesa_id = "FAKE Mpesa ID"
+        self.order.add_item(item=self.item)
+        order_mpesa_transaction = self.order.payment_success(transaction_id, mpesa_id)
+        self.assertIsInstance(
+            order_mpesa_transaction,
+            OrderMpesaTransaction
+        )

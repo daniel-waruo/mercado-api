@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'buyers',
     'orders',
     'ussd',
-    'ussd_screens'
+    'ussd_screens',
+    'dashboard'
 ]
 
 MIDDLEWARE = [

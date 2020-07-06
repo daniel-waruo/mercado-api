@@ -1,18 +1,14 @@
-from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Sum
-from django.template.loader import render_to_string
-from django.utils import timezone
-from buyers.models import Buyer, ContactQueue
-from dj_africastalking.sms import send_sms
-from items.models import Item, ComplementaryItem
 
-vendor_phone = settings.VENDOR['phone']
-vendor_name = settings.VENDOR['name']
+from buyers.models import Buyer, ContactQueue
+from items.models import Item, ComplementaryItem
 
 
 # Create your models here.
+
+
 class OrderManager(models.Manager):
     def make_order(self, buyer, item, payment_method='on-delivery'):
         assert payment_method in ['m-pesa', 'on-delivery']
@@ -212,4 +208,5 @@ class OrderCheckout(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE)
 
 
+# import signal receivers
 from .receivers import *
