@@ -1,7 +1,7 @@
 from django.template.loader import render_to_string
 from orders.models import Order
 from ussd_screens.screens import Screen
-from products.models import Brand, Product, ComplementaryItem
+from products.models import Brand, Product
 from ussd_screens.utils import get_screen
 from buyers.models import ContactQueue
 

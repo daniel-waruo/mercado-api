@@ -46,6 +46,9 @@ def index(request):
                     'product': last_product
                 }
                 return session.render(screen)
+            # return the default first screen
+            screen = get_screen('choose_provider')
+            return session.render(screen)
         else:
             # get current_text
             current_input = text.split("*")[-1]
