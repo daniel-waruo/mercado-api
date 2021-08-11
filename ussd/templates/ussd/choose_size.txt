@@ -1,7 +1,6 @@
 {% extends 'ussd/base_screen.txt' %}
 {% block content %}
 Choose {{ provider.name }} gas weight
-{% for item in items %}
-{{forloop.counter}}. {{item.category}}(Ksh.{{ item.price }})
+{% for product in products %} {{forloop.counter}}. {{product.category}}(Ksh.{{ product.price }})
 {% endfor %}
 {% endblock %}

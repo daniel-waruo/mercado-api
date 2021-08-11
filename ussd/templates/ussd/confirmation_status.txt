@@ -1,6 +1,6 @@
 {% extends 'ussd/base_screen.txt' %}
 {% block content %}
-Order a {{ item.item.brand.name }} {{ item.name }} for Ksh.{{ item.price }}?
+Order a {{ product.brand.name }} {{ product.name }} for Ksh.{{ product.price }}?
 1. Yes
 2. No
 {% endblock %}

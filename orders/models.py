@@ -2,11 +2,8 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Sum
 
-from buyers.models import Buyer, ContactQueue
-from items.models import Item, ComplementaryItem
-
-
-# Create your models here.
+from buyers.models import Buyer
+from products.models import Product
 
 
 class OrderManager(models.Manager):
@@ -58,12 +55,6 @@ class Order(models.Model):
 
     def add_item(self, item, quantity=1):
         """ adds an item to the order"""
-        if isinstance(item, ComplementaryItem):
-            return OrderItem.objects.create(
-                order=self,
-                c_product=item,
-                quantity=quantity
-            )
         return OrderItem.objects.create(
             order=self,
             product=item,
@@ -72,47 +63,20 @@ class Order(models.Model):
 
     def get_order_total(self, null=False):
         """ get the total cost for the order """
-        amount_product = self.items.all().aggregate(
-            Sum('c_product__price')
-        )['c_product__price__sum']
-        amount_c_product = self.items.all().aggregate(
+        amount = self.items.all().aggregate(
             Sum('product__price')
-        )['product__price__sum']
-        # set 0 if None
-        amount_c_product = 0 if amount_c_product is None else amount_c_product
-        amount_product = 0 if amount_product is None else amount_product
-        # get total sum
-        amount_total = amount_c_product + amount_product
+        )['product__price__sum'] or 0
+        if not null and amount == 0:
+            raise Exception("No Order Items.Add products to the order")
+        return amount
 
-        if not null and amount_total == 0:
-            raise Exception("No Order Items.Add items to the order")
-        return amount_total
-
-    def pay_for_order(self):
-        """ function for paying for AfricasTalking Items """
-        checkout_request.send(sender=self.__class__, order=self)
-
-    def payment_fail(self, transaction_id):
+    def payment_fail(self):
         self.payment_status = 'failed'
         self.save()
-        mpesa_transaction = OrderMpesaTransaction.objects.failed_transaction(
-            order=self,
-            transaction_id=transaction_id
-        )
-        # send payment failiure signal
-        payment_fail.send(self.__class__, order=self)
-        return mpesa_transaction
 
     def payment_success(self, transaction_id, mpesa_id):
         self.payment_status = 'success'
         self.save()
-        mpesa_transaction = OrderMpesaTransaction.objects.successful_transaction(
-            order=self,
-            transaction_id=transaction_id,
-            mpesa_id=mpesa_id,
-        )
-        payment_success.send(self.__class__, order=self)
-        return mpesa_transaction
 
     def ship_order(self):
         self.status = 'ship'
@@ -133,35 +97,28 @@ class Order(models.Model):
         order_delivered.send(self.__class__, order=self)
 
     def __str__(self):
-        return "{} {} {} {}".format(self.id, self.buyer.phone_number, self.payment_method, self.payment_status)
+        return f"Order No. {self.id}"
 
 
 class OrderItem(models.Model):
-    """Item which was Ordered
+    """Product which was Ordered
     Args:
         order - order which links to the order item.
         product - product which was ordered
         quantity -  number of products which were ordered
     """
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, related_name='ordered_items')
-    c_product = models.ForeignKey(ComplementaryItem, on_delete=models.CASCADE, null=True, related_name='ordered_items')
-    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1, "Quantity cannot be less than one")],
-                                           default=1)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ordered_items')
+    quantity = models.PositiveIntegerField(
+        validators=[MinValueValidator(1, "Quantity cannot be less than one")],
+        default=1
+    )
 
     class Meta:
-        unique_together = (('order', 'product'), ('order', 'c_product'))
+        unique_together = (('order', 'product'),)
 
     def __str__(self):
-        if self.product:
-            return self.product.name
-        if self.c_product:
-            return self.c_product.name
-
-    def save(self, **kwargs):
-        if self.product and self.c_product:
-            raise Exception("cannot have a complementary item and an item at the same time")
-        super().save(**kwargs)
+        return self.product.name
 
 
 class OrderMpesaTransactionManager(models.Manager):

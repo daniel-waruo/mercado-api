@@ -21,7 +21,7 @@ def confirm_payment(request):
         assert order_id
         try:
             order = Order.objects.get(id=order_id)
-        except:
+        except Order.DoesNotExist:
             return HttpResponse("ORDER DELETED")
         status = data.get("status")
         # check if status is successful

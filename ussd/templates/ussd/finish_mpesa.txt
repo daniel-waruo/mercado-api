@@ -1,6 +1,0 @@
-{% extends 'ussd/base_screen.txt' %}
-{% block content %}
-Order Successful!
-You will receive a payment confirmation message in a few minutes.
-Thank you for shopping with us. :-)
-{% endblock %}

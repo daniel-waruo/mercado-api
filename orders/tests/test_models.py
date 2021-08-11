@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from buyers.models import Buyer
-from items.models import Item, ComplementaryItem
+from products.models import Product, ComplementaryItem
 from orders.models import Order, OrderItem, OrderMpesaTransaction
 
 
@@ -13,7 +13,7 @@ class OrderTestCase(TestCase):
         self.order = Order.objects.create(
             buyer=self.buyer
         )
-        self.item = Item.objects.create(
+        self.item = Product.objects.create(
             name='Test Product',
             price=200
         )
@@ -37,7 +37,7 @@ class OrderTestCase(TestCase):
         self.order.add_item(item=self.item)
         c_item = ComplementaryItem.objects.create(
             item=self.item,
-            name='Test Comp Item',
+            name='Test Comp Product',
             price=200
         )
         self.order.add_item(item=c_item)
