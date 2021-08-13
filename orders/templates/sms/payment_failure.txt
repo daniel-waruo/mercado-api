@@ -1,6 +1,7 @@
 {% extends 'sms/base.txt' %}
 {% block content %}
 Unfortunately your M PESA payment request was not successful.
-You can place a new order by dialing *384*14344# or call us to place your order.
-PHONE NUMBER: 0797792447 (Daniel)
+You can re-place your order or if you need more information call us from the number below.
+
+phone: 0797792447 (Daniel)
 {% endblock %}

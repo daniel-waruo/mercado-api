@@ -1,7 +1,8 @@
-Django==3.0.7
+Django
 africastalking
 jsonfield
 django-environ
 
 gunicorn
 django-heroku
+twilio

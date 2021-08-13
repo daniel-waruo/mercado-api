@@ -1,0 +1,5 @@
+VENDOR NOTIFICATION
+
+FROM : {{ buyer }}
+
+REASON:{{ notification }}

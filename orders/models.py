@@ -7,7 +7,7 @@ from products.models import Product
 
 
 class OrderManager(models.Manager):
-    def make_order(self, buyer, item, payment_method='on-delivery'):
+    def make_order(self, buyer, item, payment_method='on-delivery', channel="whatsapp"):
         assert payment_method in ['m-pesa', 'on-delivery']
         order = self.create(
             payment_method=payment_method,
@@ -16,7 +16,7 @@ class OrderManager(models.Manager):
         # add item to order
         order.add_item(item)
         # send order requested signal
-        order_requested.send(sender=Order, order=order)
+        order_requested.send(sender=Order, order=order, channel=channel)
         return order
 
 
@@ -158,11 +158,6 @@ class OrderMpesaTransaction(models.Model):
 
     def __str__(self):
         return self.transaction_id
-
-
-class OrderCheckout(models.Model):
-    """temporary carrier for out checkout requests"""
-    order = models.OneToOneField(Order, on_delete=models.CASCADE)
 
 
 # import signal receivers

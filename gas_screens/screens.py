@@ -1,9 +1,15 @@
 from django.template.loader import render_to_string
 from orders.models import Order
-from ussd_screens.screens import Screen
+from screens.screens import Screen as BaseScreen
 from products.models import Brand, Product
-from ussd_screens.utils import get_screen
-from buyers.models import ContactQueue
+from screens.utils import get_screen
+
+
+class Screen(BaseScreen):
+    type = 'CON'
+
+    def render_ussd(self):
+        return f"{self.type} {self.render()}"
 
 
 class GetLastOrderScreen(Screen):
@@ -38,6 +44,7 @@ class GetLastOrderScreen(Screen):
 
 class ChooseProviderScreen(Screen):
     state = 'choose_provider'
+    type = 'CON'
 
     def render(self):
         """function returns a choose provider screen"""
@@ -65,6 +72,7 @@ class ChooseProviderScreen(Screen):
 class ChooseCylinderScreen(Screen):
     required_fields = ['provider_id']
     state = 'choose_cylinder'
+    type = 'CON'
 
     def render(self):
         """return choose gas menu screen"""
@@ -104,6 +112,7 @@ class ChooseCylinderScreen(Screen):
 class ChooseOwnershipStatusScreen(Screen):
     required_fields = ['product_id']
     state = 'ownership_status'
+    type = 'CON'
 
     def render(self):
         """ return a choose ownership screen"""
@@ -139,10 +148,7 @@ class FinishNoCylinderScreen(Screen):
 
     def render(self):
         """ returns a success message showing the user that we will contact him"""
-        ContactQueue.objects.add(
-            buyer=self.context['buyer'],
-            reason="NO GAS CYLINDER"
-        )
+        # finish no cylinder
         return render_to_string(
             'ussd/finish_no_cylinder.txt',
             context={
@@ -155,6 +161,7 @@ class ChooseConfirmationStatusScreen(Screen):
     required_fields = ['product_id']
     state = 'choose_confirmation_status'
     context = None
+    type = 'CON'
 
     def render(self):
         """ returns a confirmation status screen if ownership else finished  """

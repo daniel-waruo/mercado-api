@@ -53,7 +53,9 @@ INSTALLED_APPS = [
     'buyers',
     'orders',
     'ussd',
-    'ussd_screens'
+    'screens',
+    'm_sessions',
+    'whatsapp'
 ]
 
 MIDDLEWARE = [
@@ -133,7 +135,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # set screen urls path
-SCREEN_URLS_PATH = 'ussd.screen_urls'
+SCREEN_URLS_PATH = 'gas_screens.screen_urls'
 
 # africastalking configuration
 AFRICASTALKING = {
@@ -145,7 +147,9 @@ AFRICASTALKING = {
 # default vendor config
 VENDOR = {
     'phone': env('VENDOR_PHONE'),
+    'whatsapp_phone': env('VENDOR_WHATSAPP_PHONE'),
     'name': env('VENDOR_NAME')
 }
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Activate django heroku settings
 django_heroku.settings(locals())
