@@ -30,5 +30,5 @@ urlpatterns = [
     path('ussd-bot', csrf_exempt(ussd_bot), name='ussd-bot'),
 
     path('ussd/checkout_callback', confirm_payment, name='ussd-callback'),
-    path('admin', admin.site.urls),
+    path('', admin.site.urls),
 ]

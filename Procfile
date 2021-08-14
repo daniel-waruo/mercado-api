@@ -1,1 +1,1 @@
-web: gunicorn leta_gas.wsgi
+web: gunicorn root.wsgi
