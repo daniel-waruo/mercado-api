@@ -206,3 +206,4 @@ class FinishOrderScreen(Screen):
             item=product
         )
         return None
+

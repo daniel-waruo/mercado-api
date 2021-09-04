@@ -24,7 +24,7 @@ class Screen:
 
     def next_screen(self, current_input):
         """gets the next screen based on current input"""
-        raise NotImplementedError
+        return None
 
     def error_screen(self, errors):
         self.errors = errors

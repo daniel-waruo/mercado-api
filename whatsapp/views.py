@@ -1,3 +1,6 @@
+import sys
+import traceback
+
 from asgiref.sync import sync_to_async, async_to_sync
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -42,6 +45,7 @@ def _get_message_body(session_id, phone_number, text, name=None):
         session_id,
         context={
             'buyer': buyer,
+            'product': get_last_ordered_from_order(buyer)
         }
     )
     # get the session session_state
@@ -60,18 +64,13 @@ def _get_message_body(session_id, phone_number, text, name=None):
     if not session_state.state:
         # check if the user made a previous order and
         # encourage the user to continue with purchase
-        last_product = get_last_ordered_from_order(buyer)
+        last_product = session.context['product']
         if last_product:
             screen = get_last_order_screen(last_product)
-            session.context = {
-                **session.context,
-                'product': last_product
-            }
             return session.render(screen)
         # return the default first screen
         screen = get_screen('choose_provider')
         return session.render(screen)
-
     # get current session
     current_screen: Screen = session.current_screen
     try:
@@ -82,12 +81,6 @@ def _get_message_body(session_id, phone_number, text, name=None):
     next_screen = current_screen.next_screen(text)
     if not next_screen:
         return session.render(next_screen)
-
-    if next_screen.skip_input:
-        next_screen.set_context(session.context)
-        next_screen.render()
-        next_screen = next_screen.next_screen(next_data=next_screen.data)
-
     return session.render(next_screen)
 
 
@@ -104,30 +97,51 @@ def bot_processing(request):
             to=from_phone,
             message=message
         )
-    else:
-        print("This is lit")
+    return ''
 
 
-bot_processing_async = sync_to_async(bot_processing, thread_sensitive=True)
+bot_processing_async = sync_to_async(bot_processing, thread_sensitive=False)
 
 
 @csrf_exempt
-def whatsapp_bot_(request):
+def whatsapp_bot_sync(request):
     data = json.loads(request.body)
     if data.get("statuses"):
         return HttpResponse("Success")
-    bot_processing(request)
+    try:
+        sender = data["contacts"][0]
+        from_phone = sender["wa_id"]
+        text = data["messages"][0]["text"]["body"]
+        if text:
+            # run function without async
+            send_whatsapp(from_phone, f'processing ... {text}')
+        bot_processing(request)
+    except Exception:
+        print("-" * 60)
+        traceback.print_exc(file=sys.stdout)
+        print("-" * 60)
     return HttpResponse("Success")
 
 
 @sync_to_async
 @csrf_exempt
 @async_to_sync
-async def whatsapp_bot(request):
-    data = json.loads(request.body)
-    if data.get("statuses"):
-        return HttpResponse("Success")
-    # run function without async
-    loop = asyncio.get_event_loop()
-    loop.create_task(bot_processing_async(request))
+async def whatsapp_bot_async(request):
+    try:
+        data = json.loads(request.body)
+        if data.get("statuses"):
+            return HttpResponse("Success")
+        sender = data["contacts"][0]
+        text = data["messages"][0]["text"]["body"]
+        from_phone = sender["wa_id"]
+        if text:
+            send_whatsapp(from_phone, f'processing ... {text}')
+        loop = asyncio.get_event_loop()
+        loop.create_task(bot_processing_async(request))
+    except Exception:
+        print("-" * 60)
+        traceback.print_exc(file=sys.stdout)
+        print("-" * 60)
     return HttpResponse("Successful")
+
+whatsapp_bot = whatsapp_bot_async

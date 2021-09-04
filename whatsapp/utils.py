@@ -17,5 +17,7 @@ def send_whatsapp(to: str, message: str):
         'Content-Type': 'application/json',
         'D360-API-KEY': settings.WABA_API_KEY
     }
-    requests.request("POST", url, headers=headers, data=payload)
-
+    try:
+        requests.request("POST", url, headers=headers, data=payload, timeout=1000)
+    except ConnectionError:
+        print("failed connection")

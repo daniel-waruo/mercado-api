@@ -8,3 +8,5 @@ django-heroku
 twilio
 
 requests~=2.26.0
+
+waitress

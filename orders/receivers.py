@@ -4,6 +4,7 @@ from dj_africastalking.sms import send_sms
 from whatsapp.utils import send_whatsapp
 from django.dispatch import receiver
 
+from .models import Order
 from .signals import (
     order_delivered,
     order_cancel,
@@ -18,26 +19,7 @@ from django.conf import settings
 vendor_phone = settings.VENDOR["phone"]
 
 
-@receiver(order_requested)
-def send_order_notification_to_vendor(sender, **kwargs):
-    order = kwargs["order"]
-    buyer = order.buyer
-    if not buyer.location:
-        message = render_to_string(
-            'sms/notification.txt',
-            context={
-                'buyer': order.buyer,
-                'order': order,
-                'notification': 'Get Buyer Location'
-            }
-        )
-        send_whatsapp(
-            to=f'{vendor_phone}',
-            message=message
-        )
-
-
-@receiver(order_requested)
+@receiver(order_requested, dispatch_uid="vendor_order_notification")
 def send_order_notification_to_vendor(sender, **kwargs):
     order = kwargs["order"]
     message = render_to_string(
@@ -53,7 +35,7 @@ def send_order_notification_to_vendor(sender, **kwargs):
     )
 
 
-@receiver(order_requested)
+@receiver(order_requested,dispatch_uid="buyer_order_notification")
 def send_order_notification_to_buyer(sender, **kwargs):
     order = kwargs["order"]
     channel = kwargs["channel"]
@@ -155,6 +137,7 @@ def send_payment_success_notification(sender, **kwargs):
             to=order.buyer.phone_number,
             message=message
         )
+
 
 @receiver(payment_success)
 def send_payment_success_notification(sender, **kwargs):

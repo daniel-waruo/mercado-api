@@ -1,17 +1,14 @@
 {% extends 'sms/base.txt' %}
 {% block content %}
-NEW ORDER !!!!!
-{{ order.buyer }} has ordered:-
-{% for item in order.items.all %}
-    {{ item }}
-{% endfor %}
+*NEW ORDER !!!!!*
+*from* - {{ order.buyer }}:-
 
-PAYMENT STATUS: {{ order.payment_status }}
+{% for item in order.items.all %}{{ forloop.counter }}. {{ item }}{% endfor %}
 
+PAYMENT STATUS: *{{ order.payment_status }}*
 {% if order.buyer.location %}
-    LOCATION: {{ order.buyer.location }}
+LOCATION: {{ order.buyer.location }}
 {% else %}
-    LOCATION: No Known Location.Call To Acquire
+LOCATION: *Unknown*
 {% endif %}
-
 {% endblock %}

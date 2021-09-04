@@ -135,17 +135,15 @@ def order_signals(sender, instance: Order, created: bool, **kwargs):
     # get current order
     order = Order.objects.get(id=instance.id)
     if created:
-        # send order requested signal
-        order_requested.send(sender=sender, order=order, channel=order.channel)
-
-    if instance.status == "ship" and order.status != "ship":
+        return
+    elif instance.status == "ship" and order.status != "ship":
         # send order shipping signal
         order_shipping.send(sender=sender, order=order)
 
-    if instance.status == "can" and order.status != "can":
+    elif instance.status == "can" and order.status != "can":
         # send order cancelled signal
         order_cancel.send(sender=sender, order=order)
 
-    if instance.status == "fin" and order.status != "fin":
+    elif instance.status == "fin" and order.status != "fin":
         # send order delivered signal
         order_delivered.send(sender=sender, order=order)
