@@ -1,0 +1,6 @@
+{% extends 'gas/base_screen.txt' %}
+{% block content %}
+Do you have a  {{ product.brand.name }} {{ product.category.name }} cylinder for exchange?
+1. Yes
+2. No
+{% endblock %}

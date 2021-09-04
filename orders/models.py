@@ -4,6 +4,9 @@ from django.db.models import Sum
 
 from buyers.models import Buyer
 from products.models import Product
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .signals import *
 
 
 class OrderManager(models.Manager):
@@ -21,7 +24,7 @@ class OrderManager(models.Manager):
 
 
 class Order(models.Model):
-    """Manages Orders of the Items
+    """ Manages Orders of the Items
     Args:
         STATUS_CHOICES - this is the status of the delivery during the delivery process
         PAYMENT_METHODS - these are the different payment methods that one can use to pay
@@ -31,26 +34,38 @@ class Order(models.Model):
         payment_status -  boolean value to tell us whether the good was paid or not
         payment_method - mode by which the payment was made.
     """
+    buyer = models.ForeignKey(Buyer, on_delete=models.SET_NULL, null=True, related_name='orders')
+
     STATUS_CHOICES = (
         ('prep', 'Preparing'),
         ('ship', 'On Transit'),
         ('fin', 'Delivery Finished'),
         ('can', 'Delivery Cancelled')
     )
-    PAYMENT_METHODS = (
-        ('m-pesa', 'M-Pesa'),
-        ('on-delivery', 'On Delivery')
-    )
+    status = models.CharField(max_length=4, choices=STATUS_CHOICES, default='prep')
+
     PAYMENT_STATUS = (
         ('success', 'Successful Payment'),
         ('failed', 'Payment Failed '),
         ('pending', 'Payment Pending ')
     )
-    buyer = models.ForeignKey(Buyer, on_delete=models.SET_NULL, null=True, related_name='orders')
-    created_at = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=4, choices=STATUS_CHOICES, default='prep')
     payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS, default='pending')
+
+    PAYMENT_METHODS = (
+        ('m-pesa', 'M-Pesa'),
+        ('on-delivery', 'On Delivery')
+    )
     payment_method = models.CharField(max_length=15, choices=PAYMENT_METHODS, default='on-delivery')
+
+    CHANNEL = (
+        ('ussd', 'USSD'),
+        ('sms', 'SMS'),
+        ('whatsapp', 'Whatsapp')
+    )
+    channel = models.CharField(max_length=15, choices=CHANNEL, default='whatsapp')
+
+    created_at = models.DateTimeField(auto_now=True)
+
     objects = OrderManager()
 
     def add_item(self, item, quantity=1):
@@ -70,6 +85,18 @@ class Order(models.Model):
             raise Exception("No Order Items.Add products to the order")
         return amount
 
+    def ship_order(self):
+        self.status = 'ship'
+        self.save()
+
+    def cancel_order(self):
+        self.status = 'can'
+        self.save()
+
+    def finish_order(self):
+        self.status = 'fin'
+        self.save()
+
     def payment_fail(self):
         self.payment_status = 'failed'
         self.save()
@@ -77,24 +104,6 @@ class Order(models.Model):
     def payment_success(self, transaction_id, mpesa_id):
         self.payment_status = 'success'
         self.save()
-
-    def ship_order(self):
-        self.status = 'ship'
-        self.save()
-        # send order shipping signal
-        order_shipping.send(self.__class__, order=self)
-
-    def cancel_order(self):
-        self.status = 'can'
-        self.save()
-        # send order cancelled signal
-        order_cancel.send(self.__class__, order=self)
-
-    def finish_order(self):
-        self.status = 'can'
-        self.save()
-        # send order delivered signal
-        order_delivered.send(self.__class__, order=self)
 
     def __str__(self):
         return f"Order No. {self.id}"
@@ -121,44 +130,22 @@ class OrderItem(models.Model):
         return self.product.name
 
 
-class OrderMpesaTransactionManager(models.Manager):
-    def successful_transaction(self, order, transaction_id, mpesa_id):
-        return self.create(
-            order=order,
-            transaction_id=transaction_id,
-            mpesa_transaction_id=mpesa_id,
-            status='success'
-        )
+@receiver(post_save, sender=Order)
+def order_signals(sender, instance: Order, created: bool, **kwargs):
+    # get current order
+    order = Order.objects.get(id=instance.id)
+    if created:
+        # send order requested signal
+        order_requested.send(sender=sender, order=order, channel=order.channel)
 
-    def failed_transaction(self, order, transaction_id):
-        return self.create(
-            order=order,
-            transaction_id=transaction_id
-        )
+    if instance.status == "ship" and order.status != "ship":
+        # send order shipping signal
+        order_shipping.send(sender=sender, order=order)
 
+    if instance.status == "can" and order.status != "can":
+        # send order cancelled signal
+        order_cancel.send(sender=sender, order=order)
 
-class OrderMpesaTransaction(models.Model):
-    """This maps all our orders paid by m-pesa
-     Args:
-         mpesa_transaction_id - The code provided by safaricom
-         transaction_id - The transaction id provided by africastalking
-         order - The order mapped on this transaction
-     """
-    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='transaction', editable=False)
-    transaction_id = models.CharField(max_length=200, primary_key=True, editable=False, unique=True)
-    mpesa_transaction_id = models.CharField(max_length=200, null=True, editable=False, unique=True)
-
-    STATUS = (
-        ('success', 'Success'),
-        ('failed', 'Failed')
-    )
-    status = models.CharField(max_length=10, choices=STATUS, default='failed', editable=False)
-
-    objects = OrderMpesaTransactionManager()
-
-    def __str__(self):
-        return self.transaction_id
-
-
-# import signal receivers
-from .receivers import *
+    if instance.status == "fin" and order.status != "fin":
+        # send order delivered signal
+        order_delivered.send(sender=sender, order=order)

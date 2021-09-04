@@ -1,4 +1,4 @@
-{% extends 'ussd/base_screen.txt' %}
+{% extends 'gas/base_screen.txt' %}
 {% block content %}
 We shall contact you in a few minutes to get more information about the cylinder.
 Thank you for shopping with us.

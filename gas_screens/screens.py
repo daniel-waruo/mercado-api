@@ -19,7 +19,7 @@ class GetLastOrderScreen(Screen):
     def render(self):
         """ asks user whether user wants to use last order """
         response = render_to_string(
-            'ussd/use_last_order.txt',
+            'gas/last_order.txt',
             context={
                 'product': self.context['product']
             }
@@ -51,7 +51,7 @@ class ChooseProviderScreen(Screen):
         # query providers and return them ordered by their id
         providers = Brand.objects.all()
         response = render_to_string(
-            'ussd/choose_provider.txt',
+            'gas/choose_provider.txt',
             context={
                 'errors': self.errors,
                 'providers': providers
@@ -81,7 +81,7 @@ class ChooseCylinderScreen(Screen):
         )
         # choose products under brand and send it to the template
         response = render_to_string(
-            'ussd/choose_size.txt',
+            'gas/choose_size.txt',
             context={
                 'errors': self.errors,
                 'provider': provider,
@@ -120,7 +120,7 @@ class ChooseOwnershipStatusScreen(Screen):
             id=self.data['product_id']
         )
         return render_to_string(
-            'ussd/ownership_status.txt',
+            'gas/ownership_status.txt',
             context={
                 'errors': self.errors,
                 'product': product
@@ -150,7 +150,7 @@ class FinishNoCylinderScreen(Screen):
         """ returns a success message showing the user that we will contact him"""
         # finish no cylinder
         return render_to_string(
-            'ussd/finish_no_cylinder.txt',
+            'gas/finish_no_cylinder.txt',
             context={
                 'errors': self.errors
             }
@@ -170,7 +170,7 @@ class ChooseConfirmationStatusScreen(Screen):
             id=self.data['product_id']
         )
         return render_to_string(
-            'ussd/confirmation_status.txt',
+            'gas/confirmation_status.txt',
             context={
                 'errors': self.errors,
                 'product': product
@@ -205,6 +205,4 @@ class FinishOrderScreen(Screen):
             buyer=self.context['buyer'],
             item=product
         )
-        return render_to_string(
-            'ussd/finish_order.txt',
-        )
+        return None

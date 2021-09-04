@@ -1,20 +1,21 @@
 from django.utils import timezone
-from django.dispatch import receiver
 from django.template.loader import render_to_string
 from dj_africastalking.sms import send_sms
 from whatsapp.utils import send_whatsapp
+from django.dispatch import receiver
+
 from .signals import (
     order_delivered,
     order_cancel,
     order_shipping,
     order_requested,
     payment_fail,
-    payment_success
+    payment_success,
+    payment_pending
 )
 from django.conf import settings
 
 vendor_phone = settings.VENDOR["phone"]
-vendor_whatsapp = settings.VENDOR["whatsapp_phone"]
 
 
 @receiver(order_requested)
@@ -31,8 +32,7 @@ def send_order_notification_to_vendor(sender, **kwargs):
             }
         )
         send_whatsapp(
-            from_=f'whatsapp:{vendor_whatsapp}',
-            to_=f'whatsapp:{vendor_phone}',
+            to=f'{vendor_phone}',
             message=message
         )
 
@@ -48,8 +48,7 @@ def send_order_notification_to_vendor(sender, **kwargs):
         }
     )
     send_whatsapp(
-        from_=f'whatsapp:{vendor_whatsapp}',
-        to_=f'whatsapp:{vendor_phone}',
+        to=f'{vendor_phone}',
         message=message
     )
 
@@ -69,8 +68,7 @@ def send_order_notification_to_buyer(sender, **kwargs):
         send_sms(order.buyer.phone_number, message)
     else:
         send_whatsapp(
-            from_=f'whatsapp:{vendor_whatsapp}',
-            to_=f'whatsapp:{order.buyer.phone_number}',
+            to=order.buyer.phone_number,
             message=message
         )
 
@@ -94,8 +92,7 @@ def send_order_shipping_to_buyer(sender, **kwargs):
         send_sms(order.buyer.phone_number, message)
     else:
         send_whatsapp(
-            from_=f'whatsapp:{vendor_whatsapp}',
-            to_=f'whatsapp:{order.buyer.phone_number}',
+            to=order.buyer.phone_number,
             message=message
         )
 
@@ -115,8 +112,7 @@ def send_order_cancelled_notification(sender, **kwargs):
         send_sms(order.buyer.phone_number, message)
     else:
         send_whatsapp(
-            from_=f'whatsapp:{vendor_whatsapp}',
-            to_=f'whatsapp:{order.buyer.phone_number}',
+            to=order.buyer.phone_number,
             message=message
         )
 
@@ -136,11 +132,29 @@ def send_delivered_success_notification(sender, **kwargs):
         send_sms(order.buyer.phone_number, message)
     else:
         send_whatsapp(
-            from_=f'whatsapp:{vendor_whatsapp}',
-            to_=f'whatsapp:{order.buyer.phone_number}',
+            to=order.buyer.phone_number,
             message=message
         )
 
+
+@receiver(payment_pending)
+def send_payment_success_notification(sender, **kwargs):
+    order = kwargs['order']
+    channel = kwargs["channel"]
+    message = render_to_string(
+        'sms/payment_success.txt',
+        context={
+            'buyer': order.buyer,
+            'order': order
+        }
+    )
+    if channel == "ussd" or channel == "sms":
+        send_sms(order.buyer.phone_number, message)
+    else:
+        send_whatsapp(
+            to=order.buyer.phone_number,
+            message=message
+        )
 
 @receiver(payment_success)
 def send_payment_success_notification(sender, **kwargs):
@@ -157,8 +171,7 @@ def send_payment_success_notification(sender, **kwargs):
         send_sms(order.buyer.phone_number, message)
     else:
         send_whatsapp(
-            from_=f'whatsapp:{vendor_whatsapp}',
-            to_=f'whatsapp:{order.buyer.phone_number}',
+            to=order.buyer.phone_number,
             message=message
         )
 
@@ -178,7 +191,6 @@ def send_payment_failed_notification(sender, **kwargs):
         send_sms(order.buyer.phone_number, message)
     else:
         send_whatsapp(
-            from_=f'whatsapp:{vendor_whatsapp}',
-            to_=f'whatsapp:{order.buyer.phone_number}',
+            to=order.buyer.phone_number,
             message=message
         )

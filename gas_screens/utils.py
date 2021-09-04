@@ -10,7 +10,7 @@ def _get_screen(state: str, screen_urls: list, data: dict, errors=None, context:
         screen_index = states.index(state)
         screen_class = screen_urls[screen_index]
         return screen_class(data, errors, context)
-    raise Exception("invalid screen url name not found in urls")
+    raise Exception(f"invalid screen url name:{state} not found in urls")
 
 
 def get_screen(state, data=None, context=None, errors=None, screen_urls=None):

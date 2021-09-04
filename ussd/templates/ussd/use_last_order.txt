@@ -1,9 +1,0 @@
-{% extends 'ussd/base_screen.txt' %}
-{% block content %}
-Last Time you ordered a Order a {{ product.brand.name }} {{ product.name }} for Ksh.{{ product.price }}.
-
-Do you want to order it again?
-1. Yes
-2. No
-
-{% endblock %}

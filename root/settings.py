@@ -55,7 +55,9 @@ INSTALLED_APPS = [
     'ussd',
     'screens',
     'm_sessions',
-    'whatsapp'
+    'whatsapp',
+    'payments',
+    'gas_screens'
 ]
 
 MIDDLEWARE = [
@@ -73,7 +75,7 @@ ROOT_URLCONF = 'root.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'gas_screens/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -144,12 +146,31 @@ AFRICASTALKING = {
     'product_name': env('AT_PRODUCT_NAME')
 }
 
+# MPESA CONFIGURATIONS
+# credentials needed for payment
+DARAJA_CONFIG = {
+    "short_code": os.environ.get("DARAJA_SHORT_CODE"),
+    "consumer_key": os.environ.get("DARAJA_CONSUMER_KEY"),
+    "consumer_secret": os.environ.get("DARAJA_CONSUMER_SECRET"),
+    "pass_key": os.environ.get("DARAJA_PASS_KEY")
+}
+
+# this is the base url for the daraja website
+DARAJA_BASE_URL = os.environ.get("DARAJA_URL")
+
+# this is the callback base url for the daraja callback
+CALLBACK_BASE_URL = os.environ.get("CALLBACK_BASE_URL")
+
 # default vendor config
 VENDOR = {
     'phone': env('VENDOR_PHONE'),
-    'whatsapp_phone': env('VENDOR_WHATSAPP_PHONE'),
     'name': env('VENDOR_NAME')
 }
+
+# WABA CREDENTIALS
+WABA_API_KEY = env.str("WABA_API_KEY")
+
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Activate django heroku settings
 django_heroku.settings(locals())

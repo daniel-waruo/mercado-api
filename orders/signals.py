@@ -6,6 +6,8 @@ payment_fail = django.dispatch.Signal(providing_args=['order'])
 
 payment_success = django.dispatch.Signal(providing_args=['order'])
 
+payment_pending = django.dispatch.Signal(providing_args=['order'])
+
 order_shipping = django.dispatch.Signal(providing_args=['order'])
 
 order_cancel = django.dispatch.Signal(providing_args=['order'])

@@ -1,0 +1,7 @@
+{% extends 'gas/base_screen.txt' %}
+{% block content %}
+Confirm Order :-
+*{{ product.name }}* - _Ksh.{{ product.price }}?_
+1. Yes
+2. No
+{% endblock %}

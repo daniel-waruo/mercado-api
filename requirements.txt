@@ -1,8 +1,10 @@
-Django
-africastalking
-jsonfield
+Django~=3.2.6
+africastalking~=1.2.4
+jsonfield~=3.1.0
 django-environ
 
 gunicorn
 django-heroku
 twilio
+
+requests~=2.26.0

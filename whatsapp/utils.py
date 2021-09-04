@@ -1,15 +1,21 @@
-from twilio.rest import Client
-
-import os
-
-account_sid = os.environ['TWILIO_ACCOUNT_SID']
-auth_token = os.environ['TWILIO_AUTH_TOKEN']
+import requests
+import json
+from django.conf import settings
 
 
-def send_whatsapp(from_: str, to_: str, message: str):
-    client = Client(account_sid, auth_token)
-    client.messages.create(
-        body=message,
-        from_=from_,
-        to=to_
-    )
+def send_whatsapp(to: str, message: str):
+    url = "https://waba.360dialog.io/v1/messages"
+    payload = json.dumps({
+        "to": to,
+        "type": "text",
+        "recipient_type": "individual",
+        "text": {
+            "body": message
+        }
+    })
+    headers = {
+        'Content-Type': 'application/json',
+        'D360-API-KEY': settings.WABA_API_KEY
+    }
+    requests.request("POST", url, headers=headers, data=payload)
+

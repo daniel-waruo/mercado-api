@@ -23,14 +23,14 @@ class Session(BaseSession):
 
 @csrf_exempt
 def ussd_bot(request):
-    code = "ussd"
+    code = "gas"
     if request.method == 'POST':
         phone_number = request.POST.get('phoneNumber')
         session_id = f"{code}:{phone_number}"
         text = request.POST.get('text')
         # get buyer from the system
         buyer = get_buyer(phone_number)
-        # initialize the ussd session
+        # initialize the gas session
         session = Session(
             session_id,
             context={
@@ -39,7 +39,7 @@ def ussd_bot(request):
         )
         # load the default screen
         if text == "":
-            # if new ussd session clear the session state
+            # if new gas session clear the session state
             session.session_state.reset()
             # this is the first screen to be shown
             last_product = get_last_ordered_from_order(buyer)

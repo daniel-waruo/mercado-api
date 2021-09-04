@@ -1,5 +1,6 @@
 class Screen:
     state = None
+    skip_input = False
     required_fields = []
 
     def __init__(self, data, errors=None, context=None):
