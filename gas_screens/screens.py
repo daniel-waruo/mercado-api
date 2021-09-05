@@ -21,6 +21,7 @@ class GetLastOrderScreen(Screen):
         response = render_to_string(
             'gas/last_order.txt',
             context={
+                **self.context,
                 'product': self.context['product']
             }
         )
@@ -39,7 +40,7 @@ class GetLastOrderScreen(Screen):
                 }
             )
         # If the answer is 2 for no start the Gas Order Flow
-        return get_screen('choose_provider')
+        return get_screen('choose_cylinder')
 
 
 class ChooseProviderScreen(Screen):
@@ -70,22 +71,19 @@ class ChooseProviderScreen(Screen):
 
 
 class ChooseCylinderScreen(Screen):
-    required_fields = ['provider_id']
     state = 'choose_cylinder'
     type = 'CON'
 
     def render(self):
         """return choose gas menu screen"""
-        provider = Brand.objects.get(
-            id=self.data['provider_id']
-        )
+        products = Product.objects.all()
         # choose products under brand and send it to the template
         response = render_to_string(
-            'gas/choose_size.txt',
+            'gas/choose_cylinder.txt',
             context={
+                **self.context,
                 'errors': self.errors,
-                'provider': provider,
-                'products': provider.products.all()
+                'products': products,
             }
         )
         return response
@@ -95,14 +93,8 @@ class ChooseCylinderScreen(Screen):
         # check for errors in ownership and go to the next step
         # which is ownership status
         try:
-            provider = Brand.objects.get(
-                id=self.data['provider_id']
-            )
-            product = Product.objects.get_by_position(
-                current_input,
-                queryset=provider.products.all()
-            )
-        except (Brand.DoesNotExist, Product.DoesNotExist, IndexError):
+            product = Product.objects.get_by_position(current_input)
+        except (Product.DoesNotExist, IndexError):
             return self.error_screen(errors=['Invalid option.Check and try again'])
         return get_screen('ownership_status', data={
             'product_id': product.id

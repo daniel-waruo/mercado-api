@@ -69,7 +69,7 @@ def _get_message_body(session_id, phone_number, text, name=None):
             screen = get_last_order_screen(last_product)
             return session.render(screen)
         # return the default first screen
-        screen = get_screen('choose_provider')
+        screen = get_screen('choose_cylinder')
         return session.render(screen)
     # get current session
     current_screen: Screen = session.current_screen
@@ -135,7 +135,7 @@ async def whatsapp_bot_async(request):
         text = data["messages"][0]["text"]["body"]
         from_phone = sender["wa_id"]
         if text:
-            send_whatsapp(from_phone, f'processing ... {text}')
+            send_whatsapp(from_phone, f'processing ...')
         loop = asyncio.get_event_loop()
         loop.create_task(bot_processing_async(request))
     except Exception:

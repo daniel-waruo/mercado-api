@@ -1,6 +1,0 @@
-{% extends 'gas/base_screen.txt' %}
-{% block content %}
-Choose {{ provider.name }} gas weight
-{% for product in products %} {{forloop.counter}}. {{product.category}}(Ksh.{{ product.price }})
-{% endfor %}
-{% endblock %}
