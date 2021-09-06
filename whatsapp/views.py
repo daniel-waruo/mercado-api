@@ -58,6 +58,7 @@ def _get_message_body(session_id, phone_number, text, name=None):
         session_state.reset()
     # check if whatsapp response has taken too long
     elif session.session_state.is_expired():
+        send_whatsapp(phone_number,f'Hi {buyer.name},\nYou took too long to response.\n Going back to HOME')
         # reset the session_state
         session_state.reset()
 
