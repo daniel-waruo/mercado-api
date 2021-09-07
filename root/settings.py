@@ -38,9 +38,9 @@ ALLOWED_HOSTS = []
 
 if DEBUG:
     ALLOWED_HOSTS.append("*")
-
-# REDIRECT TO HTTPS
-SECURE_SSL_REDIRECT = not DEBUG
+if not DEBUG:
+    # REDIRECT TO HTTPS
+    SECURE_SSL_REDIRECT = True
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
