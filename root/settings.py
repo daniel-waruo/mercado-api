@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'whatsapp',
     'payments',
     'gas_screens',
+    'egg_screens',
     'store',
 ]
 

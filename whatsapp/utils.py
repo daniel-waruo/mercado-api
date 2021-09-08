@@ -27,7 +27,7 @@ def get_hook_data(request):
     data = json.loads(request.body)
     sender = data["contacts"][0]
     phone = sender["wa_id"]
-    session_id = f"whatsapp:{sender}"
+    session_id = f"whatsapp:{phone}"
     name = sender["profile"]["name"]
     text = data["messages"][0]["text"]["body"]
     return phone, session_id, name, text

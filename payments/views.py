@@ -8,7 +8,6 @@ from payments.models import OrderTransaction
 
 @csrf_exempt
 def order_mpesa_callback(request):
-    print(request.body)
     return HttpResponse("This is lit.")
 
 

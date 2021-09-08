@@ -15,8 +15,6 @@ class Session:
 
     @property
     def session_state(self):
-        if hasattr(self, '_session_state'):
-            return self._session_state
         session, created = SessionState.objects.get_or_create(
             session_id=self._session_id,
             defaults={
@@ -26,8 +24,9 @@ class Session:
         )
         return session
 
-    @property
-    def current_screen(self):
+    def current_screen(self, get_screen_func=None):
+        if get_screen_func:
+            get_screen = get_screen_func
         return get_screen(self.session_state.state, data=self.session_state.data)
 
     def render(self, screen):
@@ -42,3 +41,6 @@ class Session:
 
     def reset(self):
         self.session_state.reset()
+
+    def update(self, state, data, context):
+        self.session_state.update(state, data, context)

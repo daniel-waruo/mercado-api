@@ -30,7 +30,6 @@ class STK(object):
                 self.config.consumer_secret
             )
         )
-        print(response.headers)
         return response.json()["access_token"]
 
     def _encoded_password(self, time_now):

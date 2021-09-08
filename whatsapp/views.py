@@ -5,12 +5,11 @@ from asgiref.sync import sync_to_async, async_to_sync
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from buyers.models import Buyer
 from buyers.utils import get_buyer
-from gas_screens.utils import get_last_order_screen, get_last_ordered_from_order
-from screens.utils import get_screen
+from gas_screens.utils import get_last_ordered_from_order
+from gas_screens.views import get_message_body as get_gas_message
+from egg_screens.views import get_message_body as get_egg_message
 from .utils import send_whatsapp, get_hook_data
-from screens.screens import Screen
 from m_sessions.sessions import Session as BaseSession
 import json
 
@@ -24,47 +23,11 @@ class Session(BaseSession):
             return ''
         self.session_state.update(
             state=screen.state,
-            data=screen.data
+            data=screen.data,
+            context=self.session_state.context
         )
         screen.set_context(self.context)
         return screen.render()
-
-
-@csrf_exempt
-def whatsapp_bot_status(request):
-    return HttpResponse(status=200, content="Successful")
-
-
-def _get_message_body(session: Session, buyer: Buyer, text: str):
-    # check if whatsapp response has taken too long
-    if session.session_state.is_expired():
-        send_whatsapp(buyer.phone_number, f'Hi {buyer.name},\nYou took too long to response.\n Going back to HOME')
-        # reset the session_state
-        session.reset()
-
-    if not session.state:
-        # check if the user made a previous order and
-        # encourage the user to continue with purchase
-        last_product = session.context['product']
-        if last_product:
-            screen = get_last_order_screen(last_product)
-            return session.render(screen)
-        # return the default first screen
-        screen = get_screen('choose_cylinder')
-        return session.render(screen)
-    # get current session
-    current_screen: Screen = session.current_screen
-    # make sure input is an integer
-    try:
-        text = int(text)
-    except ValueError:
-        return session.render(current_screen)
-
-    # get the next screen
-    next_screen = current_screen.next_screen(text)
-    if not next_screen:
-        return session.render(next_screen)
-    return session.render(next_screen)
 
 
 def bot_processing(request):
@@ -82,13 +45,25 @@ def bot_processing(request):
             'product': get_last_ordered_from_order(buyer)
         }
     )
-    # check if in trigger word
-    trigger_words = ['hi', 'hallo', 'gas']
+    # check if in trigger word and set session appropriately
+    trigger_words = ['eggs', 'gas', 'hi']
     # check if time is expired based on time difference
     if text.lower().strip() in trigger_words:
-        # if any trigger words are found reset the session_state
+        context = text.lower().strip()
+        if context == 'hi':
+            context = 'gas'
+        session_state = session.session_state
+        session_state.update(None, None, context=context)
+
+    # check if whatsapp response has taken too long
+    if session.session_state.is_expired():
+        send_whatsapp(buyer.phone_number, f'Hi {buyer.name},\nYou took too long to response.\n Going back to HOME')
+        # reset the session_state
         session.reset()
-    message = _get_message_body(session, buyer, text)
+    if session.session_state.context == 'eggs':
+        message = get_egg_message(session, buyer, text)
+    else:
+        message = get_gas_message(session, buyer, text)
     if message:
         send_whatsapp(to=phone, message=message)
 
@@ -96,16 +71,15 @@ def bot_processing(request):
 bot_processing_async = sync_to_async(bot_processing, thread_sensitive=False)
 
 
-@sync_to_async
 @csrf_exempt
-@async_to_sync
-async def whatsapp_bot_async(request):
+def whatsapp_bot_async(request):
     try:
         data = json.loads(request.body)
         if data.get("statuses"):
             return HttpResponse("Success")
-        loop = asyncio.get_event_loop()
-        loop.create_task(bot_processing_async(request))
+        bot_processing(request)
+        # loop = asyncio.get_event_loop()
+        # loop.create_task(bot_processing_async(request))
     except Exception as e:
         print("-" * 60)
         print(e)
