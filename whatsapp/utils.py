@@ -21,3 +21,13 @@ def send_whatsapp(to: str, message: str):
         requests.request("POST", url, headers=headers, data=payload, timeout=1000)
     except ConnectionError:
         print("failed connection")
+
+
+def get_hook_data(request):
+    data = json.loads(request.body)
+    sender = data["contacts"][0]
+    phone = sender["wa_id"]
+    session_id = f"whatsapp:{sender}"
+    name = sender["profile"]["name"]
+    text = data["messages"][0]["text"]["body"]
+    return phone, session_id, name, text

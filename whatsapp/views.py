@@ -4,11 +4,12 @@ import traceback
 from asgiref.sync import sync_to_async, async_to_sync
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from buyers.utils import get_buyer, get_buyer_async
+
+from buyers.models import Buyer
+from buyers.utils import get_buyer
 from gas_screens.utils import get_last_order_screen, get_last_ordered_from_order
-from m_sessions.models import SessionState
 from screens.utils import get_screen
-from .utils import send_whatsapp
+from .utils import send_whatsapp, get_hook_data
 from screens.screens import Screen
 from m_sessions.sessions import Session as BaseSession
 import json
@@ -34,35 +35,14 @@ def whatsapp_bot_status(request):
     return HttpResponse(status=200, content="Successful")
 
 
-def _get_message_body(session_id, phone_number, text, name=None):
-    # get the buyer from the phone number
-    buyer = get_buyer(phone_number)
-    if name and not buyer.name:
-        buyer.name = name
-        buyer.save()
-    # session id is the buyer id
-    session = Session(
-        session_id,
-        context={
-            'buyer': buyer,
-            'product': get_last_ordered_from_order(buyer)
-        }
-    )
-    # get the session session_state
-    session_state: SessionState = session.get_session()
-    # check if in trigger word
-    trigger_words = ['hi', 'hallo', 'gas']
-    # check if time is expired based on time difference
-    if text.lower().strip() in trigger_words:
-        # if any trigger words are found reset the session_state
-        session_state.reset()
+def _get_message_body(session: Session, buyer: Buyer, text: str):
     # check if whatsapp response has taken too long
-    elif session.session_state.is_expired():
-        send_whatsapp(phone_number,f'Hi {buyer.name},\nYou took too long to response.\n Going back to HOME')
+    if session.session_state.is_expired():
+        send_whatsapp(buyer.phone_number, f'Hi {buyer.name},\nYou took too long to response.\n Going back to HOME')
         # reset the session_state
-        session_state.reset()
+        session.reset()
 
-    if not session_state.state:
+    if not session.state:
         # check if the user made a previous order and
         # encourage the user to continue with purchase
         last_product = session.context['product']
@@ -74,10 +54,12 @@ def _get_message_body(session_id, phone_number, text, name=None):
         return session.render(screen)
     # get current session
     current_screen: Screen = session.current_screen
+    # make sure input is an integer
     try:
         text = int(text)
     except ValueError:
         return session.render(current_screen)
+
     # get the next screen
     next_screen = current_screen.next_screen(text)
     if not next_screen:
@@ -86,42 +68,32 @@ def _get_message_body(session_id, phone_number, text, name=None):
 
 
 def bot_processing(request):
-    data = json.loads(request.body)
-    sender = data["contacts"][0]
-    from_phone = sender["wa_id"]
-    session_id = f"whatsapp:{sender}"
-    name = sender["profile"]["name"]
-    text = data["messages"][0]["text"]["body"]
-    message = _get_message_body(session_id, from_phone, text, name)
+    phone, session_id, name, text = get_hook_data(request)
+    # get the buyer from the phone number
+    buyer = get_buyer(phone)
+    if name and not buyer.name:
+        buyer.name = name
+        buyer.save()
+    # session id is the buyer id
+    session = Session(
+        session_id,
+        context={
+            'buyer': buyer,
+            'product': get_last_ordered_from_order(buyer)
+        }
+    )
+    # check if in trigger word
+    trigger_words = ['hi', 'hallo', 'gas']
+    # check if time is expired based on time difference
+    if text.lower().strip() in trigger_words:
+        # if any trigger words are found reset the session_state
+        session.reset()
+    message = _get_message_body(session, buyer, text)
     if message:
-        send_whatsapp(
-            to=from_phone,
-            message=message
-        )
-    return ''
+        send_whatsapp(to=phone, message=message)
 
 
 bot_processing_async = sync_to_async(bot_processing, thread_sensitive=False)
-
-
-@csrf_exempt
-def whatsapp_bot_sync(request):
-    data = json.loads(request.body)
-    if data.get("statuses"):
-        return HttpResponse("Success")
-    try:
-        sender = data["contacts"][0]
-        from_phone = sender["wa_id"]
-        text = data["messages"][0]["text"]["body"]
-        if text:
-            # run function without async
-            send_whatsapp(from_phone, f'processing ... {text}')
-        bot_processing(request)
-    except Exception:
-        print("-" * 60)
-        traceback.print_exc(file=sys.stdout)
-        print("-" * 60)
-    return HttpResponse("Success")
 
 
 @sync_to_async
@@ -132,17 +104,14 @@ async def whatsapp_bot_async(request):
         data = json.loads(request.body)
         if data.get("statuses"):
             return HttpResponse("Success")
-        sender = data["contacts"][0]
-        text = data["messages"][0]["text"]["body"]
-        from_phone = sender["wa_id"]
-        if text:
-            send_whatsapp(from_phone, f'processing ...')
         loop = asyncio.get_event_loop()
         loop.create_task(bot_processing_async(request))
-    except Exception:
+    except Exception as e:
         print("-" * 60)
+        print(e)
         traceback.print_exc(file=sys.stdout)
         print("-" * 60)
     return HttpResponse("Successful")
+
 
 whatsapp_bot = whatsapp_bot_async
