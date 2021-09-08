@@ -6,11 +6,13 @@ from buyers.models import Buyer
 from products.models import Product
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
+from store.models import StoreOrder
 from .signals import *
 
 
 class OrderManager(models.Manager):
-    def make_order(self, buyer, item, payment_method='on-delivery', channel="whatsapp"):
+    def make_order(self, buyer, item, payment_method='on-delivery', channel="whatsapp", store=None):
         assert payment_method in ['m-pesa', 'on-delivery']
         order = self.create(
             payment_method=payment_method,
@@ -18,8 +20,10 @@ class OrderManager(models.Manager):
         )
         # add item to order
         order.add_item(item)
+        if store:
+            StoreOrder.objects.create(store=store, order=order)
         # send order requested signal
-        order_requested.send(sender=Order, order=order, channel=channel)
+        order_requested.send(sender=Order, order=order, store=store, channel=channel)
         return order
 
 

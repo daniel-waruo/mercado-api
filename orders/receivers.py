@@ -29,21 +29,33 @@ def send_order_notification_to_vendor(sender, **kwargs):
             'order': order,
         }
     )
+    phone = vendor_phone
+    if kwargs.get('store'):
+        store = kwargs['store']
+        phone = store.phone
     send_whatsapp(
-        to=f'{vendor_phone}',
+        to=f'{phone}',
         message=message
     )
 
 
-@receiver(order_requested,dispatch_uid="buyer_order_notification")
+@receiver(order_requested, dispatch_uid="buyer_order_notification")
 def send_order_notification_to_buyer(sender, **kwargs):
     order = kwargs["order"]
     channel = kwargs["channel"]
+    store_name = 'Daniel'
+    store_phone = '254797792447'
+    if kwargs.get('store'):
+        store = kwargs['store']
+        store_name = store.name
+        store_phone = store.phone
     message = render_to_string(
         'sms/order_requested.txt',
         context={
             'buyer': order.buyer,
             'order': order,
+            'store_name': store_name,
+            'store_phone': store_phone
         }
     )
     if channel == "ussd" or channel == "sms":

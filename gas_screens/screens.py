@@ -76,7 +76,7 @@ class ChooseCylinderScreen(Screen):
 
     def render(self):
         """return choose gas menu screen"""
-        products = Product.objects.all()
+        products = Product.objects.filter(tag='refill')
         # choose products under brand and send it to the template
         response = render_to_string(
             'gas/choose_cylinder.txt',

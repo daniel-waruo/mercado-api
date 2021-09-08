@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from orders.models import Order
 from products.models import Product
 
 
@@ -22,7 +21,7 @@ class StoreProduct(models.Model):
 
 class StoreOrder(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='orders')
-    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='store_orders')
+    order = models.OneToOneField('orders.Order', on_delete=models.CASCADE, related_name='store_orders')
 
     def __str__(self):
         return str(self.order)

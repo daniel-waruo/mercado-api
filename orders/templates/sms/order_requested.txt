@@ -3,5 +3,5 @@
 Your order for {% for item in order.items.all %}*{{ item }}*,{% endfor %} has been received and is being processed.
 
 For enquiries call or text the mobile number below.
-PHONE NUMBER : 0797792447 (Daniel).
+PHONE NUMBER : {{ store_phone }} ({{ store_name }}).
 {% endblock %}

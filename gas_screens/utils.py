@@ -15,8 +15,8 @@ def get_last_order_screen(last_product):
     return screen
 
 
-def get_last_ordered_from_order(buyer):
-    last_order: Order = Order.objects.filter(buyer=buyer).order_by('id').last()
+def get_last_ordered_from_order(buyer, filters: dict = {}):
+    last_order: Order = Order.objects.filter(buyer=buyer, **filters).order_by('id').last()
     if not last_order:
         return last_order
     # get the first order item as for

@@ -42,11 +42,10 @@ def bot_processing(request):
         session_id,
         context={
             'buyer': buyer,
-            'product': get_last_ordered_from_order(buyer)
         }
     )
     # check if in trigger word and set session appropriately
-    trigger_words = ['eggs', 'gas', 'hi']
+    trigger_words = ['eggs', 'gas', 'hi', 'mayai', 'egg', 'patterns']
     # check if time is expired based on time difference
     if text.lower().strip() in trigger_words:
         context = text.lower().strip()
@@ -60,9 +59,11 @@ def bot_processing(request):
         send_whatsapp(buyer.phone_number, f'Hi {buyer.name},\nYou took too long to response.\n Going back to HOME')
         # reset the session_state
         session.reset()
-    if session.session_state.context == 'eggs':
+    if session.session_state.context in ['eggs', 'mayai', 'egg', 'patterns']:
+        session.context['product'] = get_last_ordered_from_order(buyer, {'items__product__tag': 'eggs'})
         message = get_egg_message(session, buyer, text)
     else:
+        session.context['product'] = get_last_ordered_from_order(buyer, {'items__product__tag': 'refill'})
         message = get_gas_message(session, buyer, text)
     if message:
         send_whatsapp(to=phone, message=message)

@@ -1,4 +1,3 @@
 {% block content %}
 {% endblock %}
-Thank you and keep safe,
-Leta Gas Team
+Thank you and keep safe

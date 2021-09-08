@@ -11,7 +11,10 @@ def get_message_body(session: Session, buyer: Buyer, text: str):
         # encourage the user to continue with purchase
         last_product = session.context['product']
         if last_product:
-            screen = get_last_order_screen(last_product)
+            screen = get_screen(
+                'last_order',
+                data={'product_id': last_product.id}
+            )
             return session.render(screen)
         # return the default first screen
         screen = get_screen('choose_cylinder')

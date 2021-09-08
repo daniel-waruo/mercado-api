@@ -1,7 +1,8 @@
 from django.template.loader import render_to_string
 from orders.models import Order
 from screens.screens import Screen as BaseScreen
-from products.models import Brand, Product
+from products.models import Product
+from store.models import Store
 from .utils import get_screen
 
 
@@ -91,9 +92,11 @@ class FinishOrderScreen(Screen):
         product = Product.objects.get(
             id=self.data['product_id']
         )
+        store = Store.objects.get(code='PATTERNS')
         # make an order
         Order.objects.make_order(
             buyer=self.context['buyer'],
-            item=product
+            item=product,
+            store=store
         )
         return None
