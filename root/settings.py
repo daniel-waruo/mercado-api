@@ -58,7 +58,8 @@ INSTALLED_APPS = [
     'm_sessions',
     'whatsapp',
     'payments',
-    'gas_screens'
+    'gas_screens',
+    'store',
 ]
 
 MIDDLEWARE = [
