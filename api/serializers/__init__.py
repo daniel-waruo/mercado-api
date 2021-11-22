@@ -65,7 +65,8 @@ class ProductSerializer(serializers.ModelSerializer):
     categoryName = serializers.SerializerMethodField('get_category_name')
 
     def get_category_name(self, product: Product):
-        return product.category.name
+        if product.category:
+            return product.category.name
 
     inStock = serializers.SerializerMethodField('get_in_stock')
 
