@@ -1,25 +1,29 @@
+import calendar
+
+from dateutil.relativedelta import relativedelta
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Q, F
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils import timezone
 
 from buyers.models import Buyer
 from products.models import Product
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
 from store.models import StoreOrder
 from .signals import *
+from .utils import months
 
 
 class OrderManager(models.Manager):
-    def make_order(self, buyer, item, payment_method='on-delivery', channel="whatsapp", store=None):
+    def make_order(self, buyer, item, payment_method='on-delivery', channel="whatsapp", quantity=1, store=None):
         assert payment_method in ['m-pesa', 'on-delivery']
         order = self.create(
             payment_method=payment_method,
             buyer=buyer
         )
         # add item to order
-        order.add_item(item)
+        order.add_item(item, quantity)
         if store:
             StoreOrder.objects.create(store=store, order=order)
         # send order requested signal
@@ -72,6 +76,9 @@ class Order(models.Model):
 
     objects = OrderManager()
 
+    class Meta:
+        ordering = '-id',
+
     def add_item(self, item, quantity=1):
         """ adds an item to the order"""
         return OrderItem.objects.create(
@@ -113,19 +120,57 @@ class Order(models.Model):
         return f"Order No. {self.id}"
 
 
+class OrderItemManager(models.Manager):
+    def create(self, order, product, quantity):
+        return super().create(
+            order=order,
+            product=product,
+            quantity=quantity,
+            price=product.price,
+            cost=product.cost
+        )
+
+    def year_metrics(self, year: int):
+        start, end = timezone.datetime(year, 1, 1), timezone.datetime(year, 12, 31)
+        qs = self.get_queryset()
+        sales_aggregations = {}
+        profit_aggregations = {}
+        for month in months(start, end):  # the start of each month in the range
+            month_name = calendar.month_name[month.month]
+            aggregation_name = month_name
+            profit_aggregations[aggregation_name] = Sum(
+                F('price') - F('cost'), filter=Q(
+                    order__status='fin',
+                    order__payment_status='success',
+                    order__created_at__gt=month,
+                    order__created_at__lte=month + relativedelta(months=1)
+                )
+            )
+            sales_aggregations[aggregation_name] = Sum(
+                'quantity', filter=Q(
+                    order__status='fin',
+                    order__payment_status='success',
+                    order__created_at__gt=month,
+                    order__created_at__lte=month + relativedelta(months=1)
+                )
+            )
+        return {
+            'profit': list(map(lambda item: item[1] or 0, qs.aggregate(**profit_aggregations).items())),
+            'sales': list(map(lambda item: item[1] or 0, qs.aggregate(**sales_aggregations).items()))
+        }
+
+
 class OrderItem(models.Model):
-    """Product which was Ordered
-    Args:
-        order - order which links to the order item.
-        product - product which was ordered
-        quantity -  number of products which were ordered
-    """
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ordered_items')
+    price = models.DecimalField(decimal_places=2, max_digits=9, default=0.0)
+    cost = models.DecimalField(decimal_places=2, max_digits=9, default=0.0)
     quantity = models.PositiveIntegerField(
         validators=[MinValueValidator(1, "Quantity cannot be less than one")],
         default=1
     )
+
+    objects = OrderItemManager()
 
     class Meta:
         unique_together = (('order', 'product'),)

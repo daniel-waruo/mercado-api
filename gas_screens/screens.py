@@ -74,9 +74,10 @@ class ChooseCylinderScreen(Screen):
     state = 'choose_cylinder'
     type = 'CON'
 
+
     def render(self):
         """return choose gas menu screen"""
-        products = Product.objects.filter(tag='refill')
+        products = Product.objects.filter(sku__startswith='gas')
         # choose products under brand and send it to the template
         response = render_to_string(
             'gas/choose_cylinder.txt',
@@ -93,7 +94,10 @@ class ChooseCylinderScreen(Screen):
         # check for errors in ownership and go to the next step
         # which is ownership status
         try:
-            product = Product.objects.get_by_position(current_input)
+            product = Product.objects.get_by_position(
+                current_input,
+                queryset=Product.objects.filter(sku__startswith='gas')
+            )
         except (Product.DoesNotExist, IndexError):
             return self.error_screen(errors=['Invalid option.Check and try again'])
         return get_screen('ownership_status', data={
@@ -180,7 +184,7 @@ class ChooseConfirmationStatusScreen(Screen):
                 }
             )
         if current_input == 2:
-            return get_screen('choose_provider')
+            return get_screen('choose_cylinder')
 
 
 class FinishOrderScreen(Screen):
@@ -197,5 +201,11 @@ class FinishOrderScreen(Screen):
             buyer=self.context['buyer'],
             item=product
         )
-        return None
+        return render_to_string(
+            'gas/finish_order.txt',
+            context={
+                'errors': self.errors,
+                'product': product
+            }
+        )
 

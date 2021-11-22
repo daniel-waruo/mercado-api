@@ -47,12 +47,20 @@ class Product(models.Model):
         brand - The brand of the product
         price - price of the product
     """
+    sku = models.CharField(max_length=50, null=True)
     name = models.CharField(max_length=200)
+
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL, related_name='products')
     brand = models.ForeignKey(Brand, null=True, on_delete=models.SET_NULL, related_name='products')
+
     tag = models.CharField(max_length=50, null=True)
     product_code = models.CharField(max_length=50, null=True)
+
     price = models.DecimalField(decimal_places=2, max_digits=9)
+    cost = models.DecimalField(decimal_places=2, max_digits=9, default=0.0)
+
+    in_stock = models.PositiveIntegerField(default=0)
+
     objects = ModelManager()
 
     def __str__(self):

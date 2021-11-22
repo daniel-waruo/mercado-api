@@ -8,5 +8,9 @@ django-heroku
 twilio
 
 requests~=2.26.0
-
 waitress
+
+djangorestframework~=3.12.4
+asgiref~=3.4.1
+django-cors-headers
+python-dateutil

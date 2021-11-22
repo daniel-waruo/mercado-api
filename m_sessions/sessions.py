@@ -1,6 +1,4 @@
-from .http import Response
 from .models import SessionState
-from screens.utils import get_screen
 
 
 class Session:
@@ -19,25 +17,29 @@ class Session:
             session_id=self._session_id,
             defaults={
                 'state': None,
-                'data': None
+                'data': None,
+                'buyer': self.context.get('buyer')
             }
         )
         return session
 
     def current_screen(self, get_screen_func=None):
+        from screens.utils import get_screen
         if get_screen_func:
             get_screen = get_screen_func
         return get_screen(self.session_state.state, data=self.session_state.data)
 
     def render(self, screen):
         """gets the screen type and renders the screen"""
+        if not screen:
+            return None
         self.session_state.update(
             state=screen.state,
-            data=screen.data
+            data=screen.data,
+
         )
         screen.set_context(self.context)
-        response = screen.render()
-        return Response(self, response)
+        return screen.render()
 
     def reset(self):
         self.session_state.reset()

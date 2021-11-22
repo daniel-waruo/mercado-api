@@ -59,10 +59,10 @@ def send_order_notification_to_buyer(sender, **kwargs):
         }
     )
     if channel == "ussd" or channel == "sms":
-        send_sms(order.buyer.phone_number, message)
+        send_sms(order.buyer.phone, message)
     else:
         send_whatsapp(
-            to=order.buyer.phone_number,
+            to=order.buyer.phone,
             message=message
         )
 
@@ -83,10 +83,10 @@ def send_order_shipping_to_buyer(sender, **kwargs):
         }
     )
     if channel == "ussd" or channel == "sms":
-        send_sms(order.buyer.phone_number, message)
+        send_sms(order.buyer.phone, message)
     else:
         send_whatsapp(
-            to=order.buyer.phone_number,
+            to=order.buyer.phone,
             message=message
         )
 
@@ -103,10 +103,10 @@ def send_order_cancelled_notification(sender, **kwargs):
         }
     )
     if channel == "ussd" or channel == "sms":
-        send_sms(order.buyer.phone_number, message)
+        send_sms(order.buyer.phone, message)
     else:
         send_whatsapp(
-            to=order.buyer.phone_number,
+            to=order.buyer.phone,
             message=message
         )
 
@@ -123,10 +123,10 @@ def send_delivered_success_notification(sender, **kwargs):
         }
     )
     if channel == "ussd" or channel == "sms":
-        send_sms(order.buyer.phone_number, message)
+        send_sms(order.buyer.phone, message)
     else:
         send_whatsapp(
-            to=order.buyer.phone_number,
+            to=order.buyer.phone,
             message=message
         )
 
@@ -143,10 +143,10 @@ def send_payment_success_notification(sender, **kwargs):
         }
     )
     if channel == "ussd" or channel == "sms":
-        send_sms(order.buyer.phone_number, message)
+        send_sms(order.buyer.phone, message)
     else:
         send_whatsapp(
-            to=order.buyer.phone_number,
+            to=order.buyer.phone,
             message=message
         )
 
@@ -163,10 +163,10 @@ def send_payment_success_notification(sender, **kwargs):
         }
     )
     if channel == "ussd" or channel == "sms":
-        send_sms(order.buyer.phone_number, message)
+        send_sms(order.buyer.phone, message)
     else:
         send_whatsapp(
-            to=order.buyer.phone_number,
+            to=order.buyer.phone,
             message=message
         )
 
@@ -183,9 +183,9 @@ def send_payment_failed_notification(sender, **kwargs):
         }
     )
     if channel == "ussd" or channel == "sms":
-        send_sms(order.buyer.phone_number, message)
+        send_sms(order.buyer.phone, message)
     else:
         send_whatsapp(
-            to=order.buyer.phone_number,
+            to=order.buyer.phone,
             message=message
         )

@@ -1,3 +1,5 @@
+import asyncio
+import json
 import sys
 import traceback
 
@@ -6,14 +8,11 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from buyers.utils import get_buyer
+from egg_screens.views import get_message_body as get_egg_message
 from gas_screens.utils import get_last_ordered_from_order
 from gas_screens.views import get_message_body as get_gas_message
-from egg_screens.views import get_message_body as get_egg_message
-from .utils import send_whatsapp, get_hook_data
 from m_sessions.sessions import Session as BaseSession
-import json
-
-import asyncio
+from .utils import send_whatsapp, get_hook_data
 
 
 class Session(BaseSession):
@@ -31,7 +30,7 @@ class Session(BaseSession):
 
 
 def bot_processing(request):
-    phone, session_id, name, text = get_hook_data(request)
+    phone, session_id, name, text, is_interactive = get_hook_data(request)
     # get the buyer from the phone number
     buyer = get_buyer(phone)
     if name and not buyer.name:
@@ -45,18 +44,53 @@ def bot_processing(request):
         }
     )
     # check if in trigger word and set session appropriately
-    trigger_words = ['eggs', 'gas', 'hi', 'mayai', 'egg', 'patterns']
+    trigger_words = ['hi', 'hallo', 'makinika']
     # check if time is expired based on time difference
     if text.lower().strip() in trigger_words:
+        send_whatsapp(to=phone, body={
+            "recipient_type": "individual",
+            "to": phone,
+            "type": "interactive",
+            "interactive": {
+                "type": "list",
+                "header": {
+                    "type": "text",
+                    "text": "Patterns Store"
+                },
+                "body": {
+                    "text": 'Welcome to Patterns Store'
+                },
+                "action": {
+                    "button": "Select Product",
+                    "sections": [
+                        {
+                            "title": "Select Product",
+                            "rows": [
+                                {
+                                    'id': 'eggs',
+                                    'title': 'Eggs (tray)',
+                                    'description': 'Get the freshest eggs in town'
+                                },
+                                {
+                                    'id': 'gas',
+                                    'title': 'Gas',
+                                    'description': 'Get the best gas deals'
+                                }
+                            ]
+                        },
+                    ]
+                }
+            }
+        })
+        return
+    if is_interactive:
         context = text.lower().strip()
-        if context == 'hi':
-            context = 'gas'
         session_state = session.session_state
         session_state.update(None, None, context=context)
 
     # check if whatsapp response has taken too long
     if session.session_state.is_expired():
-        send_whatsapp(buyer.phone_number, f'Hi {buyer.name},\nYou took too long to response.\n Going back to HOME')
+        send_whatsapp(buyer.phone, f'Hi {buyer.name},\nYou took too long to response.\n Going back to HOME')
         # reset the session_state
         session.reset()
     if session.session_state.context in ['eggs', 'mayai', 'egg', 'patterns']:
@@ -72,15 +106,14 @@ def bot_processing(request):
 bot_processing_async = sync_to_async(bot_processing, thread_sensitive=False)
 
 
-@csrf_exempt
-def whatsapp_bot_async(request):
+async def whatsapp_bot_async(request):
     try:
         data = json.loads(request.body)
         if data.get("statuses"):
             return HttpResponse("Success")
-        bot_processing(request)
-        # loop = asyncio.get_event_loop()
-        # loop.create_task(bot_processing_async(request))
+        # bot_processing(request)
+        loop = asyncio.get_event_loop()
+        loop.create_task(bot_processing_async(request))
     except Exception as e:
         print("-" * 60)
         print(e)
@@ -89,4 +122,4 @@ def whatsapp_bot_async(request):
     return HttpResponse("Successful")
 
 
-whatsapp_bot = whatsapp_bot_async
+whatsapp_bot = csrf_exempt(async_to_sync(whatsapp_bot_async))

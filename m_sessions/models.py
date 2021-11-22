@@ -2,11 +2,14 @@ from django.db import models
 from django.utils import timezone
 from jsonfield import JSONField
 
+from buyers.models import Buyer
+
 
 class SessionState(models.Model):
     session_id = models.CharField(max_length=200, primary_key=True)
     state = models.CharField(max_length=200, null=True)
     data = JSONField(null=True)
+    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE, null=True, related_name='sessions')
     context = models.CharField(max_length=20, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)

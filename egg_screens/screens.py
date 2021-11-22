@@ -1,8 +1,8 @@
 from django.template.loader import render_to_string
+
 from orders.models import Order
-from screens.screens import Screen as BaseScreen
 from products.models import Product
-from store.models import Store
+from screens.screens import Screen as BaseScreen
 from .utils import get_screen
 
 
@@ -19,7 +19,7 @@ class OrderQuantityScreen(Screen):
 
     def render(self):
         """return choose egg menu screen"""
-        product = Product.objects.get(product_code='EGGS')
+        product = Product.objects.get(sku='eggs')
         # choose products under brand and send it to the template
         response = render_to_string(
             'egg/order_quantity.txt',
@@ -36,7 +36,7 @@ class OrderQuantityScreen(Screen):
         # check for errors in ownership and go to the next step
         # which is ownership status
         try:
-            product = Product.objects.get(product_code='EGGS')
+            product = Product.objects.get(sku='eggs')
         except (Product.DoesNotExist, IndexError):
             return self.error_screen(errors=['Invalid option.Check and try again'])
         return get_screen('confirm_order_screen',
@@ -84,7 +84,7 @@ class ConfirmOrderScreen(Screen):
 
 
 class FinishOrderScreen(Screen):
-    required_fields = ['product_id']
+    required_fields = ['product_id', 'quantity']
     state = 'finish_order'
     type = 'END'
 
@@ -92,11 +92,16 @@ class FinishOrderScreen(Screen):
         product = Product.objects.get(
             id=self.data['product_id']
         )
-        store = Store.objects.get(code='PATTERNS')
         # make an order
         Order.objects.make_order(
             buyer=self.context['buyer'],
             item=product,
-            store=store
+            quantity=self.data['quantity']
         )
-        return None
+        return render_to_string(
+            'egg/finish_order.txt',
+            context={
+                'errors': self.errors,
+                'product': product
+            }
+        )

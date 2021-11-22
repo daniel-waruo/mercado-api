@@ -19,5 +19,5 @@ def get_message_body(session: Session, buyer: Buyer, text: str):
     # get the next screen
     next_screen = current_screen.next_screen(text)
     if not next_screen:
-        return session.render(next_screen)
+        session.reset()
     return session.render(next_screen)
