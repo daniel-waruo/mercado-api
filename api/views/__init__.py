@@ -15,12 +15,25 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
-    queryset = Buyer.objects.all()
+
+    def get_queryset(self):
+        # get all query parameters and place them in
+        # the query params
+        filters = self.request.data or {}
+        return Buyer.objects.filter(**filters)
+
     serializer_class = CustomerSerializer
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
+    def get_queryset(self):
+        # get all query parameters and place them in
+        # the query params
+        filters = {}
+        for key, value in self.request.query_params.items():
+            filters[key] = value
+        return Order.objects.filter(**filters)
+
     serializer_class = OrderSerializer
 
 
