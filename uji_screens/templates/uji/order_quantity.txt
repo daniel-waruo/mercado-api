@@ -1,0 +1,8 @@
+{% extends 'gas/base_screen.txt' %}
+{% block content %}
+*Price* - _1 Kg of {{ product.name }} @ Ksh.{{ product.price }}_
+
+How many kgs of Uji do you need ?
+
+_A minimum of 1 kg  Maximum of 100 kg_
+{% endblock %}

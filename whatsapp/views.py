@@ -12,6 +12,7 @@ from egg_screens.views import get_message_body as get_egg_message
 from gas_screens.utils import get_last_ordered_from_order
 from gas_screens.views import get_message_body as get_gas_message
 from m_sessions.sessions import Session as BaseSession
+from uji_screens.views import get_message_body as get_uji_message
 from .utils import send_whatsapp, get_hook_data
 
 
@@ -30,77 +31,96 @@ class Session(BaseSession):
 
 
 def bot_processing(request):
-    phone, session_id, name, text, is_interactive = get_hook_data(request)
-    # get the buyer from the phone number
-    buyer = get_buyer(phone)
-    if name and not buyer.name:
-        buyer.name = name
-        buyer.save()
-    # session id is the buyer id
-    session = Session(
-        session_id,
-        context={
-            'buyer': buyer,
-        }
-    )
-    # check if in trigger word and set session appropriately
-    trigger_words = ['hi', 'hallo', 'makinika']
-    # check if time is expired based on time difference
-    if text.lower().strip() in trigger_words:
-        send_whatsapp(to=phone, body={
-            "recipient_type": "individual",
-            "to": phone,
-            "type": "interactive",
-            "interactive": {
-                "type": "list",
-                "header": {
-                    "type": "text",
-                    "text": "Patterns Store"
-                },
-                "body": {
-                    "text": 'Welcome to Patterns Store'
-                },
-                "action": {
-                    "button": "Select Product",
-                    "sections": [
-                        {
-                            "title": "Select Product",
-                            "rows": [
-                                {
-                                    'id': 'eggs',
-                                    'title': 'Eggs (tray)',
-                                    'description': 'Get the freshest eggs in town'
-                                },
-                                {
-                                    'id': 'gas',
-                                    'title': 'Gas',
-                                    'description': 'Get the best gas deals'
-                                }
-                            ]
-                        },
-                    ]
-                }
+    try:
+        phone, session_id, name, text, is_interactive = get_hook_data(request)
+        print("text is :" + text)
+        # get the buyer from the phone number
+        buyer = get_buyer(phone)
+        if name and not buyer.name:
+            buyer.name = name
+            buyer.save()
+        # session id is the buyer id
+        session = Session(
+            session_id,
+            context={
+                'buyer': buyer,
             }
-        })
-        return
-    if is_interactive:
-        context = text.lower().strip()
-        session_state = session.session_state
-        session_state.update(None, None, context=context)
+        )
+        # check if in trigger word and set session appropriately
+        trigger_words = ['hi', 'hallo', 'makinika']
+        # check if time is expired based on time difference
+        if text.lower().strip() in trigger_words:
+            send_whatsapp(to=phone, body={
+                "recipient_type": "individual",
+                "to": phone,
+                "type": "interactive",
+                "interactive": {
+                    "type": "list",
+                    "header": {
+                        "type": "text",
+                        "text": "Patterns Store"
+                    },
+                    "body": {
+                        "text": 'Welcome to Patterns Store'
+                    },
+                    "action": {
+                        "button": "Select Product",
+                        "sections": [
+                            {
+                                "title": "Select Product",
+                                "rows": [
+                                    {
+                                        'id': 'eggs',
+                                        'title': 'Eggs (tray)',
+                                        'description': 'Get the freshest eggs in town.'
+                                    },
+                                    {
+                                        'id': 'gas',
+                                        'title': 'Gas',
+                                        'description': 'Get the best gas deals.'
+                                    },
+                                    {
+                                        'id': 'uji',
+                                        'title': 'Porridge',
+                                        'description': 'Healthy and nutritious.'
+                                    }
+                                ]
+                            },
+                        ]
+                    }
+                }
+            })
+            return
+        if is_interactive and not session.session_state.context:
+            context = text.lower().strip()
+            session_state = session.session_state
+            session_state.update(None, None, context=context)
 
-    # check if whatsapp response has taken too long
-    if session.session_state.is_expired():
-        send_whatsapp(buyer.phone, f'Hi {buyer.name},\nYou took too long to response.\n Going back to HOME')
-        # reset the session_state
-        session.reset()
-    if session.session_state.context in ['eggs', 'mayai', 'egg', 'patterns']:
-        session.context['product'] = get_last_ordered_from_order(buyer, {'items__product__tag': 'eggs'})
-        message = get_egg_message(session, buyer, text)
-    else:
-        session.context['product'] = get_last_ordered_from_order(buyer, {'items__product__tag': 'refill'})
-        message = get_gas_message(session, buyer, text)
-    if message:
-        send_whatsapp(to=phone, message=message)
+        # check if whatsapp response has taken too long
+        # if session.session_state.is_expired():
+        #    send_whatsapp(buyer.phone, f'Hi {buyer.name},\nYou took too long to response.\n Going back to HOME')
+        #    session.reset()
+        # get last ordered product from context and set it to context
+        session.context['product'] = get_last_ordered_from_order(
+            buyer,
+            {'items__product__sku__startswith': session.session_state.context}
+        )
+        if session.session_state.context == 'eggs':
+            message = get_egg_message(session, buyer, text)
+        elif session.session_state.context == 'gas':
+            message = get_gas_message(session, buyer, text)
+        else:
+            message = get_uji_message(session, buyer, text)
+        if message:
+            if isinstance(message, dict):
+                send_whatsapp(to=phone, body=message)
+                return
+            send_whatsapp(to=phone, message=message)
+    except Exception as e:
+        print("-" * 60)
+        print(e)
+        traceback.print_exc(file=sys.stdout)
+        print("-" * 60)
 
 
 bot_processing_async = sync_to_async(bot_processing, thread_sensitive=False)

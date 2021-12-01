@@ -1,8 +1,7 @@
 from buyers.models import Buyer
-from gas_screens.utils import get_last_order_screen, get_last_ordered_from_order
 from m_sessions.sessions import Session
-from screens.utils import get_screen
 from screens.screens import Screen
+from screens.utils import get_screen
 
 
 def get_message_body(session: Session, buyer: Buyer, text: str):

@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'payments',
     'gas_screens',
     'egg_screens',
+    'uji_screens',
     'store',
 ]
 

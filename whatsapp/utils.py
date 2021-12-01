@@ -16,7 +16,9 @@ def send_whatsapp(to: str, message: str = None, body=None):
             }
         })
     else:
-        payload = json.dumps(body)
+        if not body.get('to'):
+            body['to'] = to
+        payload = json.dumps(body,indent=2)
     headers = {
         'Content-Type': 'application/json',
         'D360-API-KEY': settings.WABA_API_KEY
@@ -37,7 +39,10 @@ def get_hook_data(request):
         name = sender["profile"]["name"]
         message = data["messages"][0]
         if message.get('interactive'):
-            text = message["interactive"]["list_reply"]["id"]
+            if message["interactive"]["type"] == "list_reply":
+                text = message["interactive"]["list_reply"]["id"]
+            else:
+                text = message["interactive"]["button_reply"]["id"]
             is_interactive = True
         else:
             text = message["text"]["body"]
