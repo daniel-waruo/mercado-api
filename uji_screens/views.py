@@ -12,8 +12,12 @@ def get_message_body(session: Session, buyer: Buyer, text: str):
         return session.render(screen)
     # get current session
     current_screen: Screen = session.current_screen(get_screen_func=get_screen)
-    # get the next screen
-    next_screen = current_screen.next_screen(text)
-    if not next_screen:
+    try:
+        # get the next screen
+        next_screen = current_screen.next_screen(text)
+        if not next_screen:
+            session.reset()
+    except Exception:
+        next_screen = current_screen
         session.reset()
     return session.render(next_screen)

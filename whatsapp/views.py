@@ -95,6 +95,7 @@ def bot_processing(request):
             context = text.lower().strip()
             session_state = session.session_state
             session_state.update(None, None, context=context)
+            session.reset()
 
         # check if whatsapp response has taken too long
         # if session.session_state.is_expired():
