@@ -31,5 +31,5 @@ urlpatterns = [
     path('ussd-bot/eggs', csrf_exempt(ussd_bot_eggs), name='eggs-bot'),
     path('ussd/checkout_callback', confirm_payment, name='gas-callback'),
     path('api/', include('api.urls')),
-    path('admin', admin.site.urls),
+    path('admin/', admin.site.urls),
 ]
