@@ -49,11 +49,13 @@ class Product(models.Model):
     """
     sku = models.CharField(max_length=50, null=True)
     name = models.CharField(max_length=200)
+    description = models.TextField(null=True)
 
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL, related_name='products')
     brand = models.ForeignKey(Brand, null=True, on_delete=models.SET_NULL, related_name='products')
 
     tag = models.CharField(max_length=50, null=True)
+
     product_code = models.CharField(max_length=50, null=True)
 
     price = models.DecimalField(decimal_places=2, max_digits=9)

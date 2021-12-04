@@ -33,23 +33,18 @@ class Session(BaseSession):
 def bot_processing(request):
     try:
         phone, session_id, name, text, is_interactive = get_hook_data(request)
-        print("text is :" + text)
         # get the buyer from the phone number
         buyer = get_buyer(phone)
         if name and not buyer.name:
             buyer.name = name
             buyer.save()
         # session id is the buyer id
-        session = Session(
-            session_id,
-            context={
-                'buyer': buyer,
-            }
-        )
+        session = Session(session_id, context={'buyer': buyer})
         # check if in trigger word and set session appropriately
-        trigger_words = ['hi', 'hallo', 'makinika']
-        # check if time is expired based on time difference
+        trigger_words = ['hi', 'hallo', 'makinika', 'hey']
+        # restart session in text
         if text.lower().strip() in trigger_words:
+            session.session_state.update(None, None, None)
             send_whatsapp(to=phone, body={
                 "recipient_type": "individual",
                 "to": phone,
@@ -70,17 +65,17 @@ def bot_processing(request):
                                 "title": "Select Product",
                                 "rows": [
                                     {
-                                        'id': 'eggs',
+                                        'id': 'menu:eggs',
                                         'title': 'Eggs (tray)',
                                         'description': 'Get the freshest eggs in town.'
                                     },
                                     {
-                                        'id': 'gas',
+                                        'id': 'menu:gas',
                                         'title': 'Gas',
                                         'description': 'Get the best gas deals.'
                                     },
                                     {
-                                        'id': 'uji',
+                                        'id': 'menu:uji',
                                         'title': 'Porridge',
                                         'description': 'Healthy and nutritious.'
                                     }
@@ -91,24 +86,23 @@ def bot_processing(request):
                 }
             })
             return
-        if is_interactive and not session.session_state.context:
-            context = text.lower().strip()
+        context = session.session_state.context
+        context = context if context in ['eggs', 'gas', 'uji'] else None
+        print(f"new product {context}")
+        if is_interactive and text.startswith('menu:'):
+            context = text.split(':')[1].lower().strip()
             session_state = session.session_state
             session_state.update(None, None, context=context)
             session.reset()
 
-        # check if whatsapp response has taken too long
-        # if session.session_state.is_expired():
-        #    send_whatsapp(buyer.phone, f'Hi {buyer.name},\nYou took too long to response.\n Going back to HOME')
-        #    session.reset()
-        # get last ordered product from context and set it to context
         session.context['product'] = get_last_ordered_from_order(
             buyer,
             {'items__product__sku__startswith': session.session_state.context}
         )
-        if session.session_state.context == 'eggs':
+        print(f"after check {context}")
+        if context == 'eggs':
             message = get_egg_message(session, buyer, text)
-        elif session.session_state.context == 'gas':
+        elif context == 'gas':
             message = get_gas_message(session, buyer, text)
         else:
             message = get_uji_message(session, buyer, text)

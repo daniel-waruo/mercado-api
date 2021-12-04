@@ -35,7 +35,7 @@ class SelectUjiScreen(Screen):
                                     lambda product: {
                                         'id': str(product.id),
                                         'title': product.name,
-                                        'description': product.category.name
+                                        'description': f"Ksh. {product.price}/kg"
                                     },
                                     products
                                 )
