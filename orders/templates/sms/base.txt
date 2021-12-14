@@ -1,3 +1,5 @@
+{% autoescape off %}
 {% block content %}
 {% endblock %}
 Thank you and keep safe
+{% endautoescape %}
