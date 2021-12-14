@@ -1,5 +1,7 @@
 from django.utils import timezone
 from django.template.loader import render_to_string
+
+from accounts.models import Vendor
 from dj_africastalking.sms import send_sms
 from whatsapp.utils import send_whatsapp
 from django.dispatch import receiver
@@ -29,14 +31,12 @@ def send_order_notification_to_vendor(sender, **kwargs):
             'order': order,
         }
     )
-    phone = vendor_phone
-    if kwargs.get('store'):
-        store = kwargs['store']
-        phone = store.phone
-    send_whatsapp(
-        to=f'{phone}',
-        message=message
-    )
+    vendors = Vendor.objects.all()
+    for vendor in vendors:
+        send_whatsapp(
+            to=f'{vendor.phone}',
+            message=message
+        )
 
 
 @receiver(order_requested, dispatch_uid="buyer_order_notification")

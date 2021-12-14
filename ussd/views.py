@@ -92,7 +92,7 @@ def ussd_bot_eggs(request):
             }
         )
         # load the default screen
-        if text == "":
+        if not text:
             # if new gas session clear the session state
             session.session_state.reset()
             # return the default first screen
