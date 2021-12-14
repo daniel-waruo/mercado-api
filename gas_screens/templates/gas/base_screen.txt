@@ -1,3 +1,5 @@
+{% autoescape off %}
 {% for error in errors %}{{error}}{% endfor %}
 {% block content %}
 {% endblock %}
+{% endautoescape %}
