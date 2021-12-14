@@ -2,6 +2,8 @@
 {% block content %}
 *NEW ORDER !!!!!*
 
+View - https://patterns.makinika.com/orders/{{ order.id }}
+
 *CUSTOMER*
 NAME - {{ order.buyer.name }}
 PHONE NUMBER - {{ order.buyer.phone_number }}
