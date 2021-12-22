@@ -138,32 +138,42 @@ class MetricsViewSet(viewsets.ViewSet):
         totals = Buyer.objects.aggregate(
             total_customers=Count('id'),
         )
+        order_totals = Order.objects.aggregate(
+            total_amount=Sum('items__product__price', filter=Q(
+                status='fin',
+                payment_status='success',
+                buyer__isnull=False
+            ))
+        )
+        total_customers = totals['total_customers'] or 0
+        total_amount = order_totals["total_amount"] or 0
+        avg_customer_revenue = total_amount / total_customers if total_customers else 0
+        # get the total number of customers who bought something
+        paid_customers = Buyer.objects.filter(
+            orders__payment_status='success',
+        ).count()
 
+        conversion_rate = paid_customers / total_customers
         return Response(
             status=200,
             data={
                 'message': 'Fetched Metrics',
                 'success': True,
                 'data': {
-                    'totalCustomer': totals['total_customer'] or 0,
-                    'avgCustomerRevenue': 0,
-                    'conversionRate': 0
+                    'totalCustomer': total_customers,
+                    'avgCustomerRevenue': avg_customer_revenue,
+                    'conversionRate': conversion_rate * 100
                 }
             }
         )
 
     def inventory_metrics(self, request):
         totals = Product.objects.aggregate(
-            total_orders=Count('id', filter=Q(
-                status='fin',
-                payment_status='success'
-            )),
-            total_amount=Sum('items__product__price', filter=Q(
-                status='fin',
-                payment_status='success'
-            )),
-            total_cancelled=Count('id', filter=Q(status='can')),
-            all_count=Count('id')
+            total_count=Count('id'),
+            inventory_value=Sum('cost'),
+            expected_profit=Sum(
+                F('price') - F('cost')
+            )
         )
         return Response(
             status=200,
@@ -171,7 +181,9 @@ class MetricsViewSet(viewsets.ViewSet):
                 'message': 'Fetched Metrics',
                 'success': True,
                 'data': {
-                    'totalProducts': totals['total_orderdavbzdz'],
+                    'totalCount': totals.get('total_count') or 0,
+                    'inventoryValue': totals.get('inventory_value') or 0,
+                    'expectedProfit': totals.get('expected_profit') or 0
                 }
             }
         )
@@ -179,6 +191,8 @@ class MetricsViewSet(viewsets.ViewSet):
 
 customer_metrics = MetricsViewSet.as_view({'get': 'customer_metrics'})
 order_metrics = MetricsViewSet.as_view({'get': 'order_metrics'})
+inventory_metrics = MetricsViewSet.as_view({'get': 'inventory_metrics'})
+
 metrics = MetricsViewSet.as_view({'get': 'metrics'})
 chart_data = MetricsViewSet.as_view({'get': 'chart_data'})
 top_five_customers = MetricsViewSet.as_view({'get': 'top_five_customers'})

@@ -3,8 +3,15 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.routers import DefaultRouter
 
 from api.views import ProductViewSet, OrderViewSet, CustomerViewSet, CategoryViewSet, BrandViewSet
-from api.views import login, user, metrics, chart_data, top_five_products, top_five_customers
-from api.views.metrics import order_metrics
+from api.views import (
+    login, user, metrics,
+    chart_data, top_five_products, top_five_customers,
+)
+from api.views.metrics import (
+    order_metrics,
+    customer_metrics,
+    inventory_metrics
+)
 
 urlpatterns = [
     # login and all pages
@@ -19,6 +26,10 @@ urlpatterns = [
 
     # order page
     path('order-metrics', order_metrics),
+    # customer page
+    path('customer-metrics', customer_metrics),
+    # inventory page
+    path('inventory-metrics', inventory_metrics),
 ]
 
 router = DefaultRouter()

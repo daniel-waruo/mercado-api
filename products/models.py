@@ -32,7 +32,7 @@ class Brand(models.Model):
         logo - logo of the brand
     """
     name = models.CharField(max_length=200)
-    logo = models.URLField()
+    logo = models.URLField(null=True)
     objects = ModelManager()
 
     def __str__(self):
