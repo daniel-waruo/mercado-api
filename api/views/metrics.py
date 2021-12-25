@@ -161,8 +161,8 @@ class MetricsViewSet(viewsets.ViewSet):
                 'success': True,
                 'data': {
                     'totalCustomer': total_customers,
-                    'avgCustomerRevenue': avg_customer_revenue,
-                    'conversionRate': conversion_rate * 100
+                    'avgCustomerRevenue': round(avg_customer_revenue, 2),
+                    'conversionRate': round(conversion_rate * 100, 2)
                 }
             }
         )
