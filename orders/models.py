@@ -191,13 +191,12 @@ def state_to_ord(status):
 
 
 @receiver(pre_save, sender=Order)
-def order_signals(sender, instance: Order, created: bool, **kwargs):
+def order_signals(sender, instance: Order, raw, **kwargs):
     # get current order
     order = Order.objects.get(id=instance.id)
     order_level = state_to_ord(order.status)
-    if created:
-        return
-    elif instance.status == "ship" and order_level < 2:
+    print(kwargs)
+    if instance.status == "ship" and order_level == 1:
         # send order shipping signal
         order_shipping.send(sender=sender, order=instance)
 

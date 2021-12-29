@@ -1,6 +1,14 @@
 {% extends 'sms/base.txt' %}
 {% block content %}
-Your {% for item in order.items %}{{ item }}{% endfor %} has been cancelled.
+Hallo 😔😔,
+Unfortunately your order has been cancelled.
 
-We could not fulfill your order.
+You had ordered :-
+ {% for item in order.items.all %} {{ item }} - {{ item.quantity }}{% endfor %}
+
+Thank You for shopping with us.
+For any complaints ,complements or suggestions about the service text or call the number below.
+
+phone: 0797792447(Daniel)
+
 {% endblock %}
