@@ -29,7 +29,10 @@ class CustomerViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # get all query parameters and place them in
         # the query params
-        filters = self.request.data or {}
+        filters = {}
+        for key, value in self.request.query_params.items():
+            if key != "page":
+                filters[key] = value
         return Buyer.objects.filter(**filters)
 
     serializer_class = CustomerSerializer
