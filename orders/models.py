@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Sum, Q, F
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
@@ -179,20 +179,32 @@ class OrderItem(models.Model):
         return self.product.name
 
 
-@receiver(post_save, sender=Order)
+def state_to_ord(status):
+    if 'prep' == status:
+        return 1
+    if 'ship' == status:
+        return 2
+    if 'fin' == status:
+        return 3
+    if 'can' == status:
+        return 4
+
+
+@receiver(pre_save, sender=Order)
 def order_signals(sender, instance: Order, created: bool, **kwargs):
     # get current order
     order = Order.objects.get(id=instance.id)
+    order_level = state_to_ord(order.status)
     if created:
         return
-    elif instance.status == "ship" and order.status != "ship":
+    elif instance.status == "ship" and order_level < 2:
         # send order shipping signal
-        order_shipping.send(sender=sender, order=order)
+        order_shipping.send(sender=sender, order=instance)
 
-    elif instance.status == "can" and order.status != "can":
-        # send order cancelled signal
-        order_cancel.send(sender=sender, order=order)
-
-    elif instance.status == "fin" and order.status != "fin":
+    elif instance.status == "fin" and order_level <= 2:
         # send order delivered signal
-        order_delivered.send(sender=sender, order=order)
+        order_delivered.send(sender=sender, order=instance)
+
+    elif instance.status == "can" and order_level <= 2:
+        # send order cancelled signal
+        order_cancel.send(sender=sender, order=instance)
