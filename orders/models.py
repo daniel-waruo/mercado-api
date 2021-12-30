@@ -90,8 +90,8 @@ class Order(models.Model):
     def get_order_total(self, null=False):
         """ get the total cost for the order """
         amount = self.items.all().aggregate(
-            Sum('product__price')
-        )['product__price__sum'] or 0
+            order_total=Sum(F('price') * F('quantity')),
+        )['order_total'] or 0
         if not null and amount == 0:
             raise Exception("No Order Items.Add products to the order")
         return amount

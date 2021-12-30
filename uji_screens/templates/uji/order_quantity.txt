@@ -2,7 +2,7 @@
 {% block content %}
 *Price* - _1 Kg of {{ product.name }} @ Ksh.{{ product.price }}_
 
-How many kgs of Uji do you need ?
+How many kgs of Uji do you need ? e.g 4
 
-_A minimum of 1 kg  Maximum of 100 kg_
+_A minimum of 1 kg  Maximum of 100 kg _
 {% endblock %}
