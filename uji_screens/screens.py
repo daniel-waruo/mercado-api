@@ -159,15 +159,15 @@ class FinishOrderScreen(Screen):
             id=self.data['product_id']
         )
         # make an order
-        Order.objects.make_order(
+        order = Order.objects.make_order(
             buyer=self.context['buyer'],
             item=product,
-            quantity=self.data['quantity']
+            quantity=self.data['quantity'],
+            send_signal=False
         )
         return render_to_string(
-            'uji/finish_order.txt',
+            'sms/order_requested.txt',
             context={
-                'errors': self.errors,
-                'product': product
+                'order': order
             }
         )

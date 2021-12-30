@@ -1,5 +1,10 @@
-VENDOR NOTIFICATION
+*📢📢 {{title}} ❗❗❗*
 
-FROM : {{ buyer }}
+*Customer*
+ 🧍 Name - {{ buyer.name }}
+ 📞 Phone - {{ buyer.phone }}
+ 📍 Location - {% if buyer.location %} {{ buyer.location }}{% else %}Not Known{% endif %}
 
-REASON:{{ notification }}
+*Reason*
+
+{{ notification }}

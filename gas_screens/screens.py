@@ -1,6 +1,7 @@
 from django.template.loader import render_to_string
 
 from orders.models import Order
+from orders.utils import send_notification
 from products.models import Brand, Product
 from screens.screens import Screen as BaseScreen
 from screens.utils import get_screen
@@ -166,7 +167,7 @@ class ChooseOwnershipStatusScreen(Screen):
         product = Product.objects.get(
             id=self.data['product_id']
         )
-        body =  render_to_string(
+        body = render_to_string(
             'gas/ownership_status.txt',
             context={
                 'errors': self.errors,
@@ -227,10 +228,17 @@ class FinishNoCylinderScreen(Screen):
 
     def render(self):
         """ returns a success message showing the user that we will contact him"""
+        buyer = self.context['buyer']
+        send_notification(
+            buyer,
+            "NO REFILL CYLINDER",
+            'The customer does not have required cylinder'
+        )
         # finish no cylinder
         return render_to_string(
             'gas/finish_no_cylinder.txt',
             context={
+                'buyer': buyer,
                 'errors': self.errors
             }
         )
@@ -312,14 +320,14 @@ class FinishOrderScreen(Screen):
             id=self.data['product_id']
         )
         # make an order
-        Order.objects.make_order(
+        order = Order.objects.make_order(
             buyer=self.context['buyer'],
-            item=product
+            item=product,
+            send_signal=False
         )
         return render_to_string(
-            'gas/finish_order.txt',
+            'sms/order_requested.txt',
             context={
-                'errors': self.errors,
-                'product': product
+                'order': order
             }
         )

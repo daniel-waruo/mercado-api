@@ -39,6 +39,9 @@ def send_order_notification_to_vendor(sender, **kwargs):
 
 @receiver(order_requested, dispatch_uid="buyer_order_notification")
 def send_order_notification_to_buyer(sender, **kwargs):
+    send_signal = kwargs.get('send_signal', True)
+    if not send_signal:
+        return
     order = kwargs["order"]
     channel = kwargs["channel"]
     store_name = 'Daniel'

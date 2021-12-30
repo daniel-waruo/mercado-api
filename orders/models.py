@@ -16,7 +16,8 @@ from .utils import months
 
 
 class OrderManager(models.Manager):
-    def make_order(self, buyer, item, payment_method='on-delivery', channel="whatsapp", quantity=1, store=None):
+    def make_order(self, buyer, item, payment_method='on-delivery', channel="whatsapp", quantity=1, store=None,
+                   send_signal=True):
         assert payment_method in ['m-pesa', 'on-delivery']
         order = self.create(
             payment_method=payment_method,
@@ -27,7 +28,7 @@ class OrderManager(models.Manager):
         if store:
             StoreOrder.objects.create(store=store, order=order)
         # send order requested signal
-        order_requested.send(sender=Order, order=order, store=store, channel=channel)
+        order_requested.send(sender=Order, order=order, store=store, channel=channel, send_signal=send_signal)
         return order
 
 

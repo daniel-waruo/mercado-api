@@ -1,5 +1,8 @@
 {% extends 'gas/base_screen.txt' %}
 {% block content %}
-We shall contact you in a few minutes to get more information about the cylinder.
+Hi 👋👋 {{ buyer.name }} ,
+
+We shall call you in a few minutes to get more information about your situation.
+
 Thank you for shopping with us.
 {% endblock %}
