@@ -1,5 +1,8 @@
 {% autoescape off %}
 {% block content %}
 {% endblock %}
-Thank you and keep safe
+Thank You for shopping with us.
+For any complaints ,complements or suggestions about the service text or call the number below.
+
+📞 Phone - 0797792447 (Daniel)
 {% endautoescape %}

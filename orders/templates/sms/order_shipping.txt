@@ -1,9 +1,14 @@
 {% extends 'sms/base.txt' %}
 {% block content %}
-Your {% for item in order.items.all %}{{ item }}{% endfor %} is ready for delivery.
-Expected time of arrival: {{  delivery_start |date:"l g:i a" }} - {{ delivery_end|date:"l g:i a" }}.
+Your order is ready for delivery.
 
-If you are not home at that time,please call the number below.
+*Ordered items*
+    📦 {% for item in order.items.all %}{{ forloop.counter }}. {{ item }} - {{ item.quantity }}{% endfor %}
 
-PHONE NUMBER : 0797792447 (Daniel).
+Total Amount - _Ksh.{{ order.get_order_total }}_
+
+Expected time of arrival:
+  ⏰ {{  delivery_start |date:"l g:i a" }} - {{ delivery_end|date:"g:i a" }}
+
+If you are not home at that time, please call us using the number below.
 {% endblock %}

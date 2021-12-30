@@ -69,8 +69,8 @@ def send_order_notification_to_buyer(sender, **kwargs):
 def send_order_shipping_to_buyer(sender, **kwargs):
     order = kwargs['order']
     channel = kwargs.get("channel", "whatsapp")
-    delivery_start = timezone.datetime.now() + timezone.timedelta(minutes=30)
-    delivery_end = timezone.datetime.now() + timezone.timedelta(hours=1)
+    delivery_start = timezone.now() + timezone.timedelta(minutes=30)
+    delivery_end = timezone.now() + timezone.timedelta(hours=1)
     message = render_to_string(
         'sms/order_shipping.txt',
         context={

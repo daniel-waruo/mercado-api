@@ -3,12 +3,7 @@
 Hallo 😔😔,
 Unfortunately your order has been cancelled.
 
-You had ordered :-
- {% for item in order.items.all %} {{ item }} - {{ item.quantity }}{% endfor %}
-
-Thank You for shopping with us.
-For any complaints ,complements or suggestions about the service text or call the number below.
-
-phone: 0797792447(Daniel)
+Ordered items :-
+ 📦 {% for item in order.items.all %}{{ forloop.counter }}. {{ item }} - {{ item.quantity }}{% endfor %}
 
 {% endblock %}

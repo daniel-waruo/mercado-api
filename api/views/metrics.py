@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from django.db.models import DecimalField, Q
 from django.db.models import Sum, F, Count
 from django.utils import timezone
@@ -10,6 +8,8 @@ from api.serializers import TopCustomerSerializer, TopProductSerializer
 from buyers.models import Buyer
 from orders.models import Order, OrderItem
 from products.models import Product
+
+timedelta = timezone.timedelta
 
 
 class MetricsViewSet(viewsets.ViewSet):

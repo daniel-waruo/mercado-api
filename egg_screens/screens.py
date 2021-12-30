@@ -58,7 +58,7 @@ class ConfirmOrderScreen(Screen):
         product = Product.objects.get(id=self.data['product_id'])
         # get quantity
         quantity = self.data['quantity']
-        return render_to_string(
+        body = render_to_string(
             'egg/confirmation_status.txt',
             context={
                 'errors': self.errors,
@@ -67,20 +67,57 @@ class ConfirmOrderScreen(Screen):
                 'total': product.price * quantity
             }
         )
+        return {
+            "recipient_type": "individual",
+            "type": "interactive",
+            "interactive": {
+                "type": "button",
+                "header": {
+                    "type": "text",
+                    "text": "Confirm your order"
+                },
+                "body": {
+                    "text": body
+                },
+                "action": {
+                    "buttons": [
+                        {
+                            "type": "reply",
+                            "reply": {
+                                "id": "1",
+                                "title": "Yes"
+                            }
+                        },
+                        {
+                            "type": "reply",
+                            "reply": {
+                                "id": "2",
+                                "title": "No"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
 
     def next_screen(self, current_input):
-        if current_input not in [1, 2]:
+        try:
+            current_input = int(current_input)
+            if current_input not in [1, 2]:
+                print("not in 1 or 2")
+                return self.error_screen(errors=["Invalid Input"])
+            if current_input == 1:
+                return get_screen(
+                    'finish_order',
+                    data={
+                        'product_id': self.data['product_id'],
+                        'quantity': self.data['quantity']
+                    }
+                )
+            if current_input == 2:
+                return get_screen('order_quantity')
+        except Exception:
             return self.error_screen(errors=["Invalid Input"])
-        if current_input == 1:
-            return get_screen(
-                'finish_order',
-                data={
-                    'product_id': self.data['product_id'],
-                    'quantity': self.data['quantity']
-                }
-            )
-        if current_input == 2:
-            return get_screen('order_quantity')
 
 
 class FinishOrderScreen(Screen):

@@ -192,18 +192,21 @@ def state_to_ord(status):
 
 @receiver(pre_save, sender=Order)
 def order_signals(sender, instance: Order, raw, **kwargs):
-    # get current order
-    order = Order.objects.get(id=instance.id)
-    order_level = state_to_ord(order.status)
-    print(kwargs)
-    if instance.status == "ship" and order_level == 1:
-        # send order shipping signal
-        order_shipping.send(sender=sender, order=instance)
+    try:
+        # get current order
+        order = Order.objects.get(id=instance.id)
+        order_level = state_to_ord(order.status)
+        print(kwargs)
+        if instance.status == "ship" and order_level == 1:
+            # send order shipping signal
+            order_shipping.send(sender=sender, order=instance)
 
-    elif instance.status == "fin" and order_level <= 2:
-        # send order delivered signal
-        order_delivered.send(sender=sender, order=instance)
+        elif instance.status == "fin" and order_level <= 2:
+            # send order delivered signal
+            order_delivered.send(sender=sender, order=instance)
 
-    elif instance.status == "can" and order_level <= 2:
-        # send order cancelled signal
-        order_cancel.send(sender=sender, order=instance)
+        elif instance.status == "can" and order_level <= 2:
+            # send order cancelled signal
+            order_cancel.send(sender=sender, order=instance)
+    except Order.DoesNotExist:
+        return

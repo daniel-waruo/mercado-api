@@ -3,5 +3,4 @@
 Unfortunately your M PESA payment request was not successful.
 You can re-place your order or if you need more information call us from the number below.
 
-phone: 0797792447 (Daniel)
 {% endblock %}

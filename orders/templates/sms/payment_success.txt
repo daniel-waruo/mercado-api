@@ -1,7 +1,8 @@
 {% extends 'sms/base.txt' %}
 {% block content %}
 Thank you for your purchase. We have received your payment of {{ order.get_order_total }} for item(s):-
-{% for item in order.items.all %}
-  - {{ item }}.
-{% endfor %}
+
+*Ordered items*
+    📦 {% for item in order.items.all %}{{ forloop.counter }}. {{ item }} - {{ item.quantity }}{% endfor %}
+
 {% endblock %}
