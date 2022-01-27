@@ -126,6 +126,7 @@ async def whatsapp_bot_async(request):
         data = json.loads(request.body)
         if data.get("statuses"):
             return HttpResponse("Success")
+        print(json.dumps(data, indent=2))
         # bot_processing(request)
         loop = asyncio.get_event_loop()
         loop.create_task(bot_processing_async(request))

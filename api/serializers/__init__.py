@@ -93,6 +93,8 @@ class TopProductSerializer(ProductSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
 
+    order = serializers.PrimaryKeyRelatedField(required=False,queryset=Order.objects.all())
+
     class Meta:
         model = OrderItem
         fields = '__all__'
@@ -101,12 +103,28 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     buyer = CustomerSerializer(read_only=True)
 
-    items = OrderItemSerializer(many=True, read_only=True)
+    items = OrderItemSerializer(many=True, read_only=False)
 
     total = serializers.SerializerMethodField('get_total_amount')
 
     def get_total_amount(self, order: Order):
         return order.get_order_total()
+
+    def create(self, validated_data):
+        items = self.initial_data.pop('items')
+        validated_data.pop('items')
+        order = Order.objects.create(
+            **validated_data,
+            buyer_id=self.initial_data.pop('buyer')['id']
+        )
+        for item in items:
+            OrderItem.objects.create(
+                order=order,
+                product=Product.objects.get(id=item['product']['id']),
+                quantity=item['quantity']
+            )
+
+        return order
 
     class Meta:
         model = Order

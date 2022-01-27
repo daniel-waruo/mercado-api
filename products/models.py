@@ -1,7 +1,9 @@
 from django.db import models
 
-
 # Create your models here.
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 class ModelManager(models.Manager):
     def get_by_position(self, position: int, queryset=None):
@@ -22,6 +24,7 @@ class Category(models.Model):
         return self.name
 
     class Meta:
+        ordering = 'name',
         verbose_name_plural = "categories"
 
 
@@ -34,6 +37,9 @@ class Brand(models.Model):
     name = models.CharField(max_length=200)
     logo = models.URLField(null=True)
     objects = ModelManager()
+
+    class Meta:
+        ordering = 'name',
 
     def __str__(self):
         return self.name
@@ -50,7 +56,7 @@ class Product(models.Model):
     sku = models.CharField(max_length=50, null=True)
     name = models.CharField(max_length=200)
     description = models.TextField(null=True)
-
+    image = models.ImageField(null=True, upload_to='product_images')
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL, related_name='products')
     brand = models.ForeignKey(Brand, null=True, on_delete=models.SET_NULL, related_name='products')
 
@@ -65,5 +71,13 @@ class Product(models.Model):
 
     objects = ModelManager()
 
+    class Meta:
+        ordering = 'sku',
+
     def __str__(self):
         return self.name
+
+
+@receiver(post_save, sender=Product)
+def facebook_update(sender, instance: Product, raw, **kwargs):
+    pass

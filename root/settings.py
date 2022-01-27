@@ -12,8 +12,6 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
-import django_heroku
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -50,6 +48,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # 3rd party
+    'storages',
     # custom applications,
     'accounts',
     'rest_framework',
@@ -68,6 +69,7 @@ INSTALLED_APPS = [
     'egg_screens',
     'uji_screens',
     'store',
+
 ]
 
 MIDDLEWARE = [
@@ -146,6 +148,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+AWS_ACCESS_KEY_ID = 'AKIA4JWY3RWF25SBG673'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'edonation'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # set screen urls path
 SCREEN_URLS_PATH = 'gas_screens.screen_urls'
@@ -194,4 +203,4 @@ CORS_ALLOW_ALL_ORIGINS = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Activate django heroku settings
-django_heroku.settings(locals())
+# django_heroku.settings(locals())

@@ -94,7 +94,7 @@ class Order(models.Model):
             order_total=Sum(F('price') * F('quantity')),
         )['order_total'] or 0
         if not null and amount == 0:
-            raise Exception("No Order Items.Add products to the order")
+            raise Exception(f"No Order Items for Order {self.id}.Add products to the order")
         return amount
 
     def ship_order(self):
