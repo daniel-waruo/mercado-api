@@ -1,19 +1,18 @@
-import json
-
 import requests
 
 from products.models import Product
 
 
-def update_facebook_catalog(product: Product, catalog_id, access_token):
+def update_facebook_catalog(product: Product, catalog_id, access_token, operation='UPDATE', body=None):
     url = f"https://graph.facebook.com/v12.0/{catalog_id}/batch"
     payload = {
         'access_token': access_token,
         'requests': [
             {
-                'method': 'UPDATE',
+                'method': operation,
                 'retailer_id': product.sku,
-                'data': {
+                'data': body or {
+
                     'availability': 'in stock',
                     'brand': product.brand.name,
                     'category': product.category.name,

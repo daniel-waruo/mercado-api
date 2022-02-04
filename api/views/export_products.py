@@ -13,6 +13,15 @@ def export_products(request: WSGIRequest):
         data = json.loads(request.body)
         for product in products:
             try:
+                try:
+                    update_facebook_catalog(
+                        product,
+                        "886770702008655",
+                        data.get('accessToken'),
+                        operation='DELETE'
+                    )
+                except:
+                    pass
                 update_facebook_catalog(
                     product,
                     "886770702008655",
