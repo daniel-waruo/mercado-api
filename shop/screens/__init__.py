@@ -39,7 +39,12 @@ class ShopMenu(Screen):
                                 {
                                     'id': 'menu:uji',
                                     'title': 'Porridge',
-                                    'description': 'Healthy and nutritious.'
+                                    'description': 'From the farm to your kitchen.'
+                                },
+                                {
+                                    'id': 'menu:grain',
+                                    'title': 'Cereals',
+                                    'description': 'High Quality but affordable'
                                 }
                             ]
                         },
