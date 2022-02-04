@@ -1,6 +1,0 @@
-{% extends 'gas/base_screen.txt' %}
-{% block content %}
-Choose cylinder
-{% for product in products %} {{forloop.counter}}. *{{product.name}}* - _Ksh.{{ product.price }}_
-{% endfor %}
-{% endblock %}

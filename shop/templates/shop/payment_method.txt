@@ -1,0 +1,6 @@
+{% extends 'shop/base_screen.txt' %}
+{% block content %}
+Select payment method that best suits you.
+
+Pay through M-pesa or On Delivery ? 👇🏿👇🏿
+{% endblock %}

@@ -23,6 +23,7 @@ class OrderManager(models.Manager):
             payment_method=payment_method,
             buyer=buyer
         )
+
         # add item to order
         order.add_item(item, quantity)
         if store:
@@ -72,6 +73,9 @@ class Order(models.Model):
         ('whatsapp', 'Whatsapp')
     )
     channel = models.CharField(max_length=15, choices=CHANNEL, default='whatsapp')
+
+    longitude = models.FloatField(null=True)
+    latitude = models.FloatField(null=True)
 
     created_at = models.DateTimeField(auto_now=True)
 

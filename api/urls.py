@@ -7,6 +7,7 @@ from api.views import (
     login, user, metrics,
     chart_data, top_five_products, top_five_customers,
 )
+from api.views.export_products import export_products
 from api.views.metrics import (
     order_metrics,
     customer_metrics,
@@ -30,6 +31,7 @@ urlpatterns = [
     path('customer-metrics', customer_metrics),
     # inventory page
     path('inventory-metrics', inventory_metrics),
+    path('export-products', csrf_exempt(export_products))
 ]
 
 router = DefaultRouter()

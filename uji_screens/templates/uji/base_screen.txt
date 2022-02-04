@@ -1,6 +1,0 @@
-{% autoescape off %}
-{% for error in errors %}{{error}}{% endfor %}
-{% block content %}
-{% endblock %}
-Replay *EGGS* or *MAYAI* to start again
-{% endautoescape %}

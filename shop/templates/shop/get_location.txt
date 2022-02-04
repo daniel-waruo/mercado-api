@@ -1,0 +1,4 @@
+*Send delivery location.*
+
+_Click on the paper clip icon there you will see the location option._
+*NB* Only works on Phone

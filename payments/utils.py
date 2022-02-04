@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from django.conf import settings
@@ -17,6 +18,8 @@ def pay_via_transaction(transaction: Transaction, callback_url, account_ref):
         phone_number = transaction.phone
         if phone_number.startswith("+"):
             phone_number = phone_number[1:]
+        if phone_number.startswith("0"):
+            phone_number = f"254{phone_number[1:]}"
         # send the stk push request to safaricom
         response = initiate_stk(
             phone_number=phone_number,
@@ -24,6 +27,8 @@ def pay_via_transaction(transaction: Transaction, callback_url, account_ref):
             account_ref=account_ref,
             callback_url=callback_url
         )
+        print("Payment Response")
+        print(json.dumps(response, indent=3))
         # if response is successful set transaction pending
         if response.get('ResponseCode') == '0':
             transaction.set_pending(
@@ -64,7 +69,7 @@ def pay_for_order(order: Order, phone: str):
     # get callback url stk push is going to use
     callback_url = f'{settings.CALLBACK_BASE_URL}/callback/order'
     # pay for the order
-    return pay_via_transaction(transaction, callback_url, account_ref="LETA GAS")
+    return pay_via_transaction(transaction, callback_url, account_ref="MAKINIKA TECH")
 
 
 def update_transaction_status(transaction: Transaction):

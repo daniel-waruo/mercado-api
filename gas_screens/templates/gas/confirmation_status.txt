@@ -1,7 +1,0 @@
-{% extends 'gas/base_screen.txt' %}
-{% block content %}
-You ordered a *{{ product.name }}*  at  _Ksh.{{ product.price }}_.
-
-Confirm Order ? 👇🏿 👇🏿
-
-{% endblock %}

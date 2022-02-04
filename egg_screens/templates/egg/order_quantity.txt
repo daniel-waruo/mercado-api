@@ -1,8 +1,0 @@
-{% extends 'gas/base_screen.txt' %}
-{% block content %}
-How many egg trays do you need ?
-
-*Price* - _1 tray @ Ksh.{{ product.price }}_
-
-_Reply with the number of trays you want e.g 5_
-{% endblock %}

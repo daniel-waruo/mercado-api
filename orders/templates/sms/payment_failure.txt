@@ -1,6 +1,6 @@
 {% extends 'sms/base.txt' %}
 {% block content %}
 Unfortunately your M PESA payment request was not successful.
-You can re-place your order or if you need more information call us from the number below.
 
+Do you want to try again ?
 {% endblock %}

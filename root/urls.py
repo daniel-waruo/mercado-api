@@ -15,10 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.views.decorators.csrf import csrf_exempt
 
 from orders.views import confirm_payment
-from ussd.views import ussd_bot_gas,ussd_bot_eggs
 from whatsapp.views import whatsapp_bot
 
 admin.site.site_header = 'Leta Gas Admin'
@@ -27,8 +25,6 @@ admin.site.site_title = 'Leta Gas Admin'
 
 urlpatterns = [
     path('whatsapp-bot', whatsapp_bot, name='whatsapp-bot'),
-    path('ussd-bot/gas', csrf_exempt(ussd_bot_gas), name='gas-bot'),
-    path('ussd-bot/eggs', csrf_exempt(ussd_bot_eggs), name='eggs-bot'),
     path('ussd/checkout_callback', confirm_payment, name='gas-callback'),
     path('api/', include('api.urls')),
     path('admin/', admin.site.urls),

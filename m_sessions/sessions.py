@@ -27,7 +27,11 @@ class Session:
         from screens.utils import get_screen
         if get_screen_func:
             get_screen = get_screen_func
-        return get_screen(self.session_state.state, data=self.session_state.data)
+        return get_screen(
+            self.session_state.state,
+            data=self.session_state.data,
+            context=self.context
+        )
 
     def render(self, screen):
         """gets the screen type and renders the screen"""

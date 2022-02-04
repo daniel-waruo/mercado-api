@@ -48,10 +48,16 @@ class Brand(models.Model):
 class Product(models.Model):
     """Product to be sold through the USSD platform
     Args:
+        sku - unique identifier of the product
         name - name of the item
+        description - description of the product
         category  - category where the item belongs e.g gas cylinder, gas burner
         brand - The brand of the product
+        tag - identifier of the product used for analytics
+        product_code - code for use in USSD or promotions
         price - price of the product
+        cost - cost of the product
+        in_stock - check if product is in stock
     """
     sku = models.CharField(max_length=50, null=True)
     name = models.CharField(max_length=200)

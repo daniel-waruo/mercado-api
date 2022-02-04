@@ -1,8 +1,0 @@
-{% extends 'gas/base_screen.txt' %}
-{% block content %}
-Hi 👋👋 {{ buyer.name }},
-Last Time you ordered a *{{ product.name }}* worth _Ksh.{{ product.price }}_.
-
-Do you want to order it again? 👇🏿 👇🏿
-
-{% endblock %}

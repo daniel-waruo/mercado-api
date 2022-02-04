@@ -1,6 +1,0 @@
-{% extends 'gas/base_screen.txt' %}
-{% block content %}
-Choose Payment method ?
-1. M Pesa
-2. On Delivery
-{% endblock %}

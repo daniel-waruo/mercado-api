@@ -62,14 +62,11 @@ INSTALLED_APPS = [
     'products',
     'buyers',
     'orders',
-    'ussd',
     'screens',
     'm_sessions',
     'whatsapp',
     'payments',
-    'gas_screens',
-    'egg_screens',
-    'uji_screens',
+    'shop',
     'store',
 
 ]

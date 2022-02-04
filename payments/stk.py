@@ -1,4 +1,5 @@
 import datetime
+import json
 from base64 import b64encode
 
 import requests
@@ -59,6 +60,7 @@ class STK(object):
             "AccountReference": account_ref[:24],
             "TransactionDesc": description or f"Payment for {phone_number}"
         }
+        print(json.dumps(request, indent=4))
         response = requests.post(url, json=request, headers=headers)
         return response.json()
 
