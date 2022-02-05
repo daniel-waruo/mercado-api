@@ -40,7 +40,7 @@ def update_facebook_batch(products, catalog_id, access_token, operation='UPDATE'
     url = f"https://graph.facebook.com/v12.0/{catalog_id}/batch"
     facebook_requests = []
     for product in products:
-        facebook_requests.append({
+        facebook_requests.append(
             {
                 'method': operation,
                 'retailer_id': product.sku,
@@ -59,7 +59,7 @@ def update_facebook_batch(products, catalog_id, access_token, operation='UPDATE'
                     'retailer_product_group_id': product.sku,
                 }
             }
-        })
+        )
     payload = {
         'access_token': access_token,
         'requests': facebook_requests
