@@ -41,7 +41,7 @@ def update_facebook_batch(products, catalog_id, access_token, operation='UPDATE'
     facebook_requests = []
 
     for product in products:
-        facebook_requests.append({
+        facebook_requests.append(
             {
                 'method': operation,
                 'retailer_id': product.sku,
@@ -60,7 +60,7 @@ def update_facebook_batch(products, catalog_id, access_token, operation='UPDATE'
                     'retailer_product_group_id': product.sku,
                 }
             }
-        })
+        )
     length_len = len(facebook_requests)
     counter = int(length_len / 6) + 1
     while counter >= 1:
