@@ -1,5 +1,3 @@
-import json
-
 from buyers.models import Buyer
 from m_sessions.sessions import Session
 from screens.screens import Screen
@@ -23,7 +21,7 @@ def get_message_body(session: Session, buyer: Buyer, message: dict):
     # get current session
     current_screen: Screen = session.current_screen(get_screen_func=get_screen)
     # get the next screen
-    next_screen:Screen = current_screen.next_screen(message)
+    next_screen: Screen = current_screen.next_screen(message)
     if not next_screen:
         session.reset()
 

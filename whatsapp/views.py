@@ -6,7 +6,6 @@ import traceback
 from asgiref.sync import sync_to_async, async_to_sync
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.viewsets import ViewSet
 
 from buyers.utils import get_buyer
 from m_sessions.sessions import Session as BaseSession
@@ -14,7 +13,7 @@ from shop.views import get_message_body
 from .parsers import parse
 from .utils import send_whatsapp, get_hook_data
 
-ViewSet
+
 class Session(BaseSession):
     def render(self, screen):
         """gets the screen type and renders the screen"""
@@ -50,6 +49,10 @@ def bot_processing(request):
         if message:
             if isinstance(message, dict):
                 send_whatsapp(to=phone, body=message)
+                return
+            if isinstance(message, list):
+                for mess in message:
+                    send_whatsapp(to=phone, body=mess)
                 return
             send_whatsapp(to=phone, message=message)
     except Exception as e:
