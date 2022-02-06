@@ -63,19 +63,17 @@ def update_facebook_batch(products, catalog_id, access_token, operation='UPDATE'
                 }
             }
         )
-    length_len = len(facebook_requests)
-    counter = int(length_len / 6) + 1
-    while counter >= 1:
-        facebook_requests = facebook_requests[0:6].copy()
+    segments = [facebook_requests[x:x + 6] for x in range(0, len(facebook_requests), 6)]
+    for segment in segments:
+        facebook_requests = facebook_requests[0:6]
         payload = {
             'access_token': access_token,
-            'requests': facebook_requests
+            'requests': segment
         }
         response = requests.request(
             "POST",
             url,
             json=payload
         )
-        counter -= 1
         print(json.dumps(payload, indent=3))
         print(response.text)
