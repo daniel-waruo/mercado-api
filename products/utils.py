@@ -1,3 +1,5 @@
+import json
+
 import requests
 
 from products.models import Product
@@ -75,4 +77,5 @@ def update_facebook_batch(products, catalog_id, access_token, operation='UPDATE'
             json=payload
         )
         counter -= 1
+        print(json.dumps(payload, indent=3))
         print(response.text)
