@@ -39,8 +39,9 @@ def update_facebook_catalog(product: Product, catalog_id, access_token, operatio
 def update_facebook_batch(products, catalog_id, access_token, operation='UPDATE'):
     url = f"https://graph.facebook.com/v12.0/{catalog_id}/batch"
     facebook_requests = []
+
     for product in products:
-        facebook_requests.append(
+        facebook_requests.append({
             {
                 'method': operation,
                 'retailer_id': product.sku,
@@ -59,14 +60,19 @@ def update_facebook_batch(products, catalog_id, access_token, operation='UPDATE'
                     'retailer_product_group_id': product.sku,
                 }
             }
+        })
+    length_len = len(facebook_requests)
+    counter = int(length_len / 6) + 1
+    while counter >= 1:
+        facebook_requests = facebook_requests[0:6]
+        payload = {
+            'access_token': access_token,
+            'requests': facebook_requests
+        }
+        response = requests.request(
+            "POST",
+            url,
+            json=payload
         )
-    payload = {
-        'access_token': access_token,
-        'requests': facebook_requests
-    }
-    response = requests.request(
-        "POST",
-        url,
-        json=payload
-    )
-    print(response.text)
+        counter -= 1
+        print(response.text)
