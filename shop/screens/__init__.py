@@ -23,7 +23,8 @@ class ShopMenu(Screen):
                         },
                         "body": {
                             "type": "text",
-                            "text": f"Shop for {category.name}"
+                            "text": f"Click on the *View Items*  button 👇 👇 👇 to view available items in the {category.name} category."
+                                    f"\n☺☺ Thanks in advance ☺☺"
                         },
                         "action": {
                             "catalog_id": "886770702008655",
