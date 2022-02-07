@@ -167,7 +167,7 @@ class OrderItemManager(models.Manager):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ordered_items')
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='ordered_items')
     price = models.DecimalField(decimal_places=2, max_digits=9, default=0.0)
     cost = models.DecimalField(decimal_places=2, max_digits=9, default=0.0)
     quantity = models.PositiveIntegerField(
