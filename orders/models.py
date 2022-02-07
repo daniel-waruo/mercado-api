@@ -92,7 +92,7 @@ class Order(models.Model):
             quantity=quantity
         )
 
-    def get_order_total(self, null=False):
+    def get_order_total(self, null=True):
         """ get the total cost for the order """
         amount = self.items.all().aggregate(
             order_total=Sum(F('price') * F('quantity')),
