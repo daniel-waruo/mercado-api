@@ -10,7 +10,7 @@ class ShopMenu(Screen):
         categories = Category.objects.all()
         responses = []
         for category in categories:
-            products = category.products.all()
+            products = category.products.filter(active=True)
             if len(products):
                 responses.append({
                     "recipient_type": "individual",

@@ -73,6 +73,8 @@ class Product(models.Model):
     price = models.DecimalField(decimal_places=2, max_digits=9)
     cost = models.DecimalField(decimal_places=2, max_digits=9, default=0.0)
 
+    active = models.BooleanField(default=True)
+
     in_stock = models.PositiveIntegerField(default=0)
 
     objects = ModelManager()
