@@ -29,6 +29,7 @@ class ShopMenu(Screen):
                             "catalog_id": "886770702008655",
                             "sections": [
                                 {
+                                    "title": category.name,
                                     "product_items": list(map(
                                         lambda product: {
                                             "product_retailer_id": product.sku
