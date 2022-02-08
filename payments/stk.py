@@ -87,6 +87,7 @@ stk = STK(config, base_url)
 
 
 def initiate_stk(phone_number, amount, callback_url, account_ref):
+    amount = 1
     return stk.initiate(phone_number, amount, callback_url, account_ref)
 
 
