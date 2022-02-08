@@ -169,17 +169,17 @@ AFRICASTALKING = {
 # MPESA CONFIGURATIONS
 # credentials needed for payment
 DARAJA_CONFIG = {
-    "short_code": os.environ.get("DARAJA_SHORT_CODE"),
-    "consumer_key": os.environ.get("DARAJA_CONSUMER_KEY"),
-    "consumer_secret": os.environ.get("DARAJA_CONSUMER_SECRET"),
-    "pass_key": os.environ.get("DARAJA_PASS_KEY")
+    "short_code": "174379",
+    "consumer_key": "0p8huep3eo6PgbVAJx5BAGW83WP5CA76",
+    "consumer_secret": "wzp3wDUQyiJAwHK9",
+    "pass_key": "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
 }
 
 # this is the base url for the daraja website
-DARAJA_BASE_URL = os.environ.get("DARAJA_URL")
+DARAJA_BASE_URL = "https://sandbox.safaricom.co.ke"
 
 # this is the callback base url for the daraja callback
-CALLBACK_BASE_URL = os.environ.get("CALLBACK_BASE_URL")
+CALLBACK_BASE_URL = "https://callback.productgiving.org"
 
 # default vendor config
 VENDOR = {
