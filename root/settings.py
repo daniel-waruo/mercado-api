@@ -62,11 +62,12 @@ INSTALLED_APPS = [
     'products',
     'buyers',
     'orders',
+    'invoices',
     'screens',
     'm_sessions',
     'whatsapp',
     'payments',
-    'shop',
+    'services',
     'store',
 
 ]

@@ -1,0 +1,10 @@
+{% extends 'sms/base.txt' %}
+{% block content %}
+Your order has been delivered successfully.
+
+*Ordered items*
+    📦 {% for item in order.items.all %}{{ forloop.counter }}. {{ item }} - {{ item.quantity }}{% endfor %}
+
+Total Amount - _Ksh.{{ order.get_order_total }}_
+
+{% endblock %}

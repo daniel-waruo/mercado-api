@@ -4,8 +4,8 @@ from orders.models import Order
 from payments.models import OrderTransaction
 from payments.utils import pay_for_order
 from products.models import Product
-from screens.screens import Screen
-from shop.utils import get_screen
+from services.shop.screens import Screen
+from services.utils import get_screen
 from whatsapp.parsers import parse
 from whatsapp.utils import send_whatsapp
 

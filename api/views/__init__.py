@@ -1,8 +1,9 @@
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 
-from api.serializers import ProductSerializer, OrderSerializer, BrandSerializer
+from api.serializers import ProductSerializer, OrderSerializer, BrandSerializer, InvoiceSerializer
 from buyers.models import Buyer
+from invoices.models import Invoice
 from orders.models import Order
 from products.models import Product, Category, Brand
 from .authentication import login, user
@@ -51,6 +52,20 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Order.objects.filter(**filters)
 
     serializer_class = OrderSerializer
+
+
+class InvoiceViewSet(viewsets.ModelViewSet):
+    pagination_class = StandardResultsSetPagination
+    serializer_class = InvoiceSerializer
+
+    def get_queryset(self):
+        # get all query parameters and place them in
+        # the query params
+        filters = {}
+        for key, value in self.request.query_params.items():
+            if key != "page":
+                filters[key] = value
+        return Invoice.objects.filter(**filters)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

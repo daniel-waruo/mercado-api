@@ -1,7 +1,7 @@
 from buyers.models import Buyer
 from m_sessions.sessions import Session
-from screens.screens import Screen
-from .utils import get_screen
+from services.shop.screens import Screen
+from services.utils import get_screen
 
 
 def get_message_body(session: Session, buyer: Buyer, message: dict):
@@ -13,11 +13,6 @@ def get_message_body(session: Session, buyer: Buyer, message: dict):
             })
         session.reset()
         return session.render(screen)
-    if not session.state:
-        # return the default first screen
-        screen = get_screen('shop_menu')
-        return session.render(screen)
-
     # get current session
     current_screen: Screen = session.current_screen(get_screen_func=get_screen)
     # get the next screen

@@ -1,0 +1,17 @@
+{% extends 'sms/base.txt' %}
+{% block content %}
+*📢📢 NEW ORDER ❗❗❗*
+
+🌐 View  - https://patterns.makinika.com/orders/{{ order.id }}
+
+*Customer*
+ 🧍 Name - {{ order.buyer.name }}
+ 📞 Phone - {{ order.buyer.phone }}
+ 📍 Location - {% if order.buyer.location %} {{ order.buyer.location }}{% else %}Not Known{% endif %}
+
+*Ordered items*
+    📦 {% for item in order.items.all %}{{ forloop.counter }}. {{ item }} - {{ item.quantity }}{% endfor %}
+
+Total Amount - _Ksh.{{ order.get_order_total }}_
+
+{% endblock %}

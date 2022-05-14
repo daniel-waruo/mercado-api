@@ -1,0 +1,4 @@
+{% extends 'shop/base_screen.txt' %}
+{% block content %}
+Enter the *PROVIDER CODE* to add provider
+{% endblock %}

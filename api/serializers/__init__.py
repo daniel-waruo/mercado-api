@@ -4,6 +4,7 @@ from rest_framework.utils import model_meta
 
 from accounts.models import User
 from buyers.models import Buyer
+from invoices.models import InvoiceItem, Invoice
 from orders.models import Order, OrderItem
 from products.models import Product, Category, Brand
 
@@ -126,6 +127,60 @@ class OrderSerializer(serializers.ModelSerializer):
             )
 
         return order
+
+    def update(self, instance, validated_data):
+        info = model_meta.get_field_info(instance)
+
+        # Simply set each attribute on the instance, and then save it.
+        # Note that unlike `.create()` we don't need to treat many-to-many
+        # relationships as being a special case. During updates we already
+        # have an instance pk for the relationships to be associated with.
+        m2m_fields = []
+        for attr, value in validated_data.items():
+            if attr in info.relations and info.relations[attr].to_many:
+                m2m_fields.append((attr, value))
+            else:
+                setattr(instance, attr, value)
+
+        instance.save()
+        return instance
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+
+class InvoiceItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvoiceItem
+        fields = '__all__'
+
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    buyer = CustomerSerializer(read_only=True)
+
+    items = InvoiceItemSerializer(many=True, read_only=False)
+
+    total = serializers.SerializerMethodField('get_total_amount')
+
+    def get_total_amount(self, order: Order):
+        return order.get_order_total()
+
+    def create(self, validated_data):
+        items = self.initial_data.pop('items')
+        validated_data.pop('items')
+        invoice = Invoice.objects.create(
+            **validated_data,
+            buyer_id=self.initial_data.pop('buyer')['id']
+        )
+        for item in items:
+            InvoiceItem.objects.create(
+                order=invoice,
+                product=Product.objects.get(id=item['product']['id']),
+                quantity=item['quantity']
+            )
+
+        return invoice
 
     def update(self, instance, validated_data):
         info = model_meta.get_field_info(instance)

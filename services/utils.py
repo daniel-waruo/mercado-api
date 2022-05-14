@@ -1,12 +1,12 @@
 import inspect
 
 from orders.models import Order
+from screens.screens import Screen
 from screens.utils import get_screen as _get_screen
 
 
 def get_screens():
     from .screen_urls import screens
-    from .screens import Screen
     screen_urls = []
     for key, value in screens.items():
         if inspect.isclass(value):

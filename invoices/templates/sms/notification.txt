@@ -1,0 +1,10 @@
+*📢📢 {{title}} ❗❗❗*
+
+*Customer*
+ 🧍 Name - {{ buyer.name }}
+ 📞 Phone - {{ buyer.phone }}
+ 📍 Location - {% if buyer.location %} {{ buyer.location }}{% else %}Not Known{% endif %}
+
+*Reason*
+
+{{ notification }}

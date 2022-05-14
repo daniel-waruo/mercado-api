@@ -1,0 +1,14 @@
+{% extends 'sms/base.txt' %}
+{% block content %}
+Your order is ready for delivery.
+
+*Ordered items*
+    📦 {% for item in order.items.all %}{{ forloop.counter }}. {{ item }} - {{ item.quantity }}{% endfor %}
+
+Total Amount - _Ksh.{{ order.get_order_total }}_
+
+Expected time of arrival:
+  ⏰ {{  delivery_start |date:"l g:i a" }} - {{ delivery_end|date:"g:i a" }}
+
+If you are not home at that time, please call us using the number below.
+{% endblock %}

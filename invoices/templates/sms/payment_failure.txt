@@ -1,0 +1,6 @@
+{% extends 'sms/base.txt' %}
+{% block content %}
+Unfortunately your M PESA payment request was not successful.
+
+Do you want to try again ?
+{% endblock %}
