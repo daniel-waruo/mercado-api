@@ -17,3 +17,7 @@ class Buyer(models.Model):
 
     def __str__(self):
         return "{}({})".format(self.phone, self.name)
+
+
+class Message(models.Model):
+    message_id = models.CharField(max_length=72, unique=True)

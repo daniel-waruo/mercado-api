@@ -13,6 +13,6 @@ def _get_screen(state: str, screen_urls: list, data: dict, errors=None, context:
 
 def get_screen(state, data=None, context=None, errors=None, screen_urls=None):
     if screen_urls is None:
-        screen_module = __import__(settings.SCREEN_URLS_PATH, globals(), locals(), ['urls'], 0)
+        screen_module = __import__(settings.SCREEN_URLS_PATHSCREEN_URLS_PATH, globals(), locals(), ['urls'], 0)
         screen_urls = screen_module.screens
     return _get_screen(state=state, screen_urls=screen_urls, data=data, errors=errors, context=context)

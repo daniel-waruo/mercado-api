@@ -1,9 +1,8 @@
-import asyncio
-import json
 import sys
+import threading
 import traceback
 
-from asgiref.sync import sync_to_async, async_to_sync
+from asgiref.sync import sync_to_async
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -31,7 +30,10 @@ class Session(BaseSession):
 
 def bot_processing(request):
     try:
-        phone, session_id, name, input_message = get_hook_data(request)
+        data = get_hook_data(request)
+        if not data:
+            return
+        phone, session_id, name, input_message = data
         # get the buyer from the phone number
         buyer = get_buyer(phone)
         if name and not buyer.name:
@@ -50,22 +52,13 @@ def bot_processing(request):
             if text.lower().strip() in trigger_words:
                 session.reset()
         message = None
-        if parse(input_message, "interactive"):
-            text = parse(input_message, "interactive")
-            if "menu:" in text:
-                session.reset()
-                screen = text.split(':')[0]
-                current_screen = get_screen(screen)
-                next_screen = current_screen.next_screen(text)
-                message = session.render(next_screen)
 
         if not message:
             if session.session_state.state:
-                print("WHY BOT")
                 message = get_message_body(session, buyer, input_message)
             else:
-                print("ELSE WHY")
-                screen = get_screen('main_menu')
+                session.reset()
+                screen = get_screen('shop_menu')
                 message = session.render(screen)
         if message:
             if isinstance(message, dict):
@@ -86,20 +79,10 @@ def bot_processing(request):
 bot_processing_async = sync_to_async(bot_processing, thread_sensitive=False)
 
 
-async def whatsapp_bot_async(request):
-    try:
-        data = json.loads(request.body)
-        if data.get("statuses"):
-            return HttpResponse("Success")
-        # bot_processing(request)
-        loop = asyncio.get_event_loop()
-        loop.create_task(bot_processing_async(request))
-    except Exception as e:
-        print("-" * 60)
-        print(e)
-        traceback.print_exc(file=sys.stdout)
-        print("-" * 60)
-    return HttpResponse("Successful")
-
-
-whatsapp_bot = csrf_exempt(async_to_sync(whatsapp_bot_async))
+@csrf_exempt
+def whatsapp_bot(request):
+    if request.method == "GET":
+        return HttpResponse(request.GET.get('hub.challenge'))
+    t = threading.Thread(target=bot_processing, args=[request], daemon=True)
+    t.start()
+    return HttpResponse(status=200)

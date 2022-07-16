@@ -14,7 +14,6 @@ class MainMenu(Screen):
             Hi 👋 {buyer.name} ,\n How can we help you today ?.
         """
         return {
-            "recipient_type": "individual",
             "to": buyer.phone,
             "type": "interactive",
             "interactive": {

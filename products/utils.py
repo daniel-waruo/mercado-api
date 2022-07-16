@@ -74,3 +74,4 @@ def update_facebook_batch(products, catalog_id, access_token, operation='UPDATE'
     )
     print(json.dumps(payload, indent=3))
     print(response.text)
+

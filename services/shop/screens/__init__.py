@@ -1,5 +1,9 @@
-from products.models import Category
+from django.template.loader import render_to_string
+
 from screens.screens import Screen
+from services.shop.utils import fetch_categories
+from services.utils import get_screen
+from whatsapp.parsers import parse
 
 
 class ShopMenu(Screen):
@@ -7,40 +11,51 @@ class ShopMenu(Screen):
 
     def render(self):
         """ return category of products to be rendered """
-        categories = Category.objects.all()
-        responses = []
-        for category in categories:
-            products = category.products.filter(active=True)
-            if len(products):
-                responses.append({
-                    "recipient_type": "individual",
-                    "type": "interactive",
-                    "interactive": {
-                        "type": "product_list",
-                        "header": {
-                            "type": "text",
-                            "text": f"Shop for {category.name}"
-                        },
-                        "body": {
-                            "type": "text",
-                            "text": f"Click on the *View Items*  button 👇 👇 👇 to view available items in the {category.name} category."
-                                    f"\n☺☺ Thanks in advance ☺☺"
-                        },
-                        "action": {
-                            "catalog_id": "886770702008655",
-                            "sections": [
-                                {
-                                    "title": category.name,
-                                    "product_items": list(map(
-                                        lambda product: {
-                                            "product_retailer_id": product.sku
-                                        },
-                                        products
-                                    ))
-                                }
-                            ]
+        buyer = self.context['buyer']
+        # fetch woo categories
+        categories = fetch_categories()
+        text = render_to_string('shop/welcome.txt')
+        return {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": buyer.phone,
+            "type": "interactive",
+            "interactive": {
+                "type": "list",
+                "header": {
+                    "type": "text",
+                    "text": "Wakini.co"
+                },
+                "body": {
+                    "text": text
+                },
+                "action": {
+                    "button": "Select Category",
+                    "sections": [
+                        {
+                            "title": "Categories",
+                            "rows": list(
+                                map(
+                                    lambda category: (
+                                        {
+                                            "id": category["id"],
+                                            "title": category["name"],
+                                            "description": category["description"]
+                                        }
+                                    ),
+                                    categories
+                                )
+                            )
                         }
-                    }
-                })
-        return responses
+                    ]
+                }
+            }
+        }
 
+    def next_screen(self, current_input):
+        return get_screen(
+            'category_products',
+            data={
+                'category_id': parse(current_input, 'interactive')
+            }
+        )

@@ -1,5 +1,7 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
 from api.serializers import ProductSerializer, OrderSerializer, BrandSerializer, InvoiceSerializer
 from buyers.models import Buyer
@@ -19,9 +21,26 @@ class StandardResultsSetPagination(PageNumberPagination):
 
 class ProductViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
-
+    authentication_classes = [TokenAuthentication]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        query = self.request.query_params.get('query')
+        return Product.objects.filter(
+            name=query,
+            description=query
+        )
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data={
+            **request.data,
+            "user": request.user.id
+        })
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
@@ -34,7 +53,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
         for key, value in self.request.query_params.items():
             if key != "page":
                 filters[key] = value
-        return Buyer.objects.filter(**filters)
+        return Buyer.objects.filter(**filters).order_by('id')
 
     serializer_class = CustomerSerializer
 

@@ -18,3 +18,5 @@ python-dateutil
 django-storages
 boto3
 pillow
+
+woocommerce
