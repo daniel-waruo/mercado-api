@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
-from api.serializers import LoginSerializer, UserSerializer, TokenSerializer
+from api.serializers import LoginSerializer, UserSerializer, TokenSerializer, OrganizationSerializer
 
 
 class AuthenticationViewSet(viewsets.ViewSet):
@@ -10,12 +10,17 @@ class AuthenticationViewSet(viewsets.ViewSet):
     def login(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            token, is_created = Token.objects.get_or_create(user=serializer.save())
+            user = serializer.save()
+            token, is_created = Token.objects.get_or_create(user=user)
             serializer = TokenSerializer(instance=token)
+            organization_data = None
+            if user.organization:
+                organization_data = OrganizationSerializer(instance=user.organization).data
             return Response(
                 data={
                     'message': 'Login successful',
                     'data': serializer.data,
+                    'organization': organization_data,
                     'success': True
                 }
             )
