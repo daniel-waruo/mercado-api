@@ -4,6 +4,8 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from organizations.models import Organization
+
 
 class ModelManager(models.Manager):
     def get_by_position(self, position: int, queryset=None):
@@ -18,6 +20,8 @@ class Category(models.Model):
         name - name of category
     """
     name = models.CharField(max_length=200)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, related_name='categories')
+
     objects = ModelManager()
 
     def __str__(self):
@@ -36,6 +40,8 @@ class Brand(models.Model):
     """
     name = models.CharField(max_length=200)
     logo = models.URLField(null=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, related_name='brands')
+
     objects = ModelManager()
 
     class Meta:
@@ -76,6 +82,7 @@ class Product(models.Model):
     active = models.BooleanField(default=True)
 
     in_stock = models.PositiveIntegerField(default=0)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, related_name='products')
 
     objects = ModelManager()
 

@@ -4,6 +4,7 @@ from django.db.models import Sum, F
 
 from buyers.models import Buyer
 from orders.models import Order
+from organizations.models import Organization
 from products.models import Product
 from .signals import *
 
@@ -48,6 +49,8 @@ class Invoice(models.Model):
 
     due_date = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, related_name='invoices')
+
     objects = InvoiceManager()
 
     class Meta:

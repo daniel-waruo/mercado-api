@@ -9,6 +9,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from buyers.models import Buyer
+from organizations.models import Organization
 from products.models import Product
 from store.models import StoreOrder
 from .signals import *
@@ -76,6 +77,8 @@ class Order(models.Model):
 
     longitude = models.FloatField(null=True)
     latitude = models.FloatField(null=True)
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, related_name='orders')
 
     created_at = models.DateTimeField(auto_now=True)
 

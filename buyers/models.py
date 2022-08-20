@@ -2,6 +2,9 @@ from django.db import models
 
 
 # Create your models here.
+from organizations.models import Organization
+
+
 class Buyer(models.Model):
     """
     Person going to buy the gas
@@ -14,6 +17,7 @@ class Buyer(models.Model):
     location = models.TextField(null=True)
     business_name = models.CharField(max_length=100, null=True)
     email = models.EmailField(null=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, related_name='buyers')
 
     def __str__(self):
         return "{}({})".format(self.phone, self.name)

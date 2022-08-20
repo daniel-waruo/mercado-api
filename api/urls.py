@@ -2,7 +2,15 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.routers import DefaultRouter
 
-from api.views import ProductViewSet, OrderViewSet, CustomerViewSet, CategoryViewSet, BrandViewSet, InvoiceViewSet
+from api.views import (
+    ProductViewSet,
+    OrderViewSet,
+    CustomerViewSet,
+    CategoryViewSet,
+    BrandViewSet,
+    InvoiceViewSet,
+    OrganizationViewSet
+)
 from api.views import (
     login, user, metrics,
     chart_data, top_five_products, top_five_customers,
@@ -42,5 +50,6 @@ router.register(r'orders', OrderViewSet, basename='order')
 router.register(r'invoices', InvoiceViewSet, basename='invoice')
 router.register(r'categories', CategoryViewSet, basename='category')
 router.register(r'brands', BrandViewSet, basename='brand')
+router.register(r'organizations', OrganizationViewSet, basename='organization')
 
 urlpatterns += router.urls
