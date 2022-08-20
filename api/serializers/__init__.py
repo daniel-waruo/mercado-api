@@ -6,6 +6,7 @@ from accounts.models import User
 from buyers.models import Buyer
 from invoices.models import InvoiceItem, Invoice
 from orders.models import Order, OrderItem
+from organizations.models import Organization
 from products.models import Product, Category, Brand
 
 
@@ -213,4 +214,10 @@ class CategorySerializer(serializers.ModelSerializer):
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
+        fields = '__all__'
+
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
         fields = '__all__'

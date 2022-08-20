@@ -7,6 +7,7 @@ from api.serializers import ProductSerializer, OrderSerializer, BrandSerializer,
 from buyers.models import Buyer
 from invoices.models import Invoice
 from orders.models import Order
+from organizations.models import Organization
 from products.models import Product, Category, Brand
 from .authentication import login, user
 from .metrics import metrics, chart_data, top_five_products, top_five_customers
@@ -98,4 +99,10 @@ class BrandViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
 
     queryset = Brand.objects.all()
+    serializer_class = BrandSerializer
+
+
+class OrganizationViewSet(viewsets.ModelViewSet):
+    pagination_class = StandardResultsSetPagination
+    queryset = Organization.objects.all()
     serializer_class = BrandSerializer
